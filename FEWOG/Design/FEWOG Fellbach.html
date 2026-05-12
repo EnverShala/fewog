@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEWOG Fellbach — Wohnraum seit 1949</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="data.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="views.jsx"></script>
+
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "palette": [
+        "#8B1D28",
+        "#4A5D4E",
+        "#FDF8F7",
+        "#2D2D2D"
+      ]
+    }/*EDITMODE-END*/;
+
+    // Palette options: [primary, secondary, bg, ink, bg-2, line, tint-primary, tint-secondary]
+    const PALETTES = [
+      {
+        name: "Fellbacher Harmonie",
+        sub: "Kappelberg-Rot & Salbei",
+        primary: "#8B1D28", secondary: "#4A5D4E",
+        bg: "#FDF8F7", bg2: "#F5EFEC", bg3: "#ECE6E2",
+        ink: "#2D2D2D", inkSoft: "#6B6663", inkMute: "#9A9590",
+        line: "#E2DAD4", lineSoft: "#EDE6E1",
+        tintP: "#F4E4E5", tintS: "#E8EAE5",
+      },
+      {
+        name: "Stein & Eiche",
+        sub: "Terrakotta & warmes Beige",
+        primary: "#A8462B", secondary: "#7A6B4F",
+        bg: "#FBF6EF", bg2: "#F3ECDF", bg3: "#E9DFCC",
+        ink: "#2A241B", inkSoft: "#6E6353", inkMute: "#9E9484",
+        line: "#E4D9C4", lineSoft: "#EDE5D2",
+        tintP: "#F4E1D6", tintS: "#E8E3D2",
+      },
+      {
+        name: "Modern Anthrazit",
+        sub: "Schiefer & Messing",
+        primary: "#1F2937", secondary: "#A87F3A",
+        bg: "#F7F6F3", bg2: "#EEEDE8", bg3: "#E2E0D9",
+        ink: "#1A1A1A", inkSoft: "#5C5C5C", inkMute: "#9A9A9A",
+        line: "#D9D7D0", lineSoft: "#E7E5DE",
+        tintP: "#DEE2EA", tintS: "#EDE3CD",
+      },
+      {
+        name: "Salbei zuerst",
+        sub: "Grün als Hauptfarbe",
+        primary: "#3E5A45", secondary: "#8B1D28",
+        bg: "#F5F7F2", bg2: "#EBEEE5", bg3: "#DDE2D2",
+        ink: "#1F2A22", inkSoft: "#5A6557", inkMute: "#94998E",
+        line: "#D5DCC9", lineSoft: "#E5E9DB",
+        tintP: "#DCE5D4", tintS: "#F4E4E5",
+      },
+    ];
+
+    function applyPalette(p) {
+      const r = document.documentElement.style;
+      r.setProperty("--c-primary",   p.primary);
+      r.setProperty("--c-secondary", p.secondary);
+      r.setProperty("--c-bg",        p.bg);
+      r.setProperty("--c-bg-2",      p.bg2);
+      r.setProperty("--c-bg-3",      p.bg3);
+      r.setProperty("--c-ink",       p.ink);
+      r.setProperty("--c-ink-soft",  p.inkSoft);
+      r.setProperty("--c-ink-mute",  p.inkMute);
+      r.setProperty("--c-line",      p.line);
+      r.setProperty("--c-line-soft", p.lineSoft);
+      r.setProperty("--c-accent-tint",    p.tintP);
+      r.setProperty("--c-secondary-tint", p.tintS);
+    }
+
+    function App() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const [page, setPage] = React.useState("start");
+
+      // Map palette tweak (array of 4 colors) to active palette by primary match
+      const activePaletteIndex = React.useMemo(() => {
+        const i = PALETTES.findIndex(p => p.primary === (t.palette?.[0] || ""));
+        return i === -1 ? 0 : i;
+      }, [t.palette]);
+
+      React.useEffect(() => {
+        applyPalette(PALETTES[activePaletteIndex]);
+      }, [activePaletteIndex]);
+
+      return (
+        <>
+          <Nav page={page} setPage={setPage} />
+          <main>
+            {page === "start" && <ViewStart setPage={setPage} />}
+            {page === "wohnen" && <ViewWohnen palette={PALETTES[activePaletteIndex]} />}
+            {(page === "service" || page === "ueberuns" || page === "aktuelles") && (
+              <ComingSoon page={page} setPage={setPage} />
+            )}
+          </main>
+          <Footer setPage={setPage} />
+
+          <TweaksPanel>
+            <TweakSection label="Farbpalette" />
+            <TweakColor
+              label="Farbwelt"
+              value={t.palette}
+              options={PALETTES.map(p => [p.primary, p.secondary, p.bg, p.ink])}
+              onChange={(v) => setTweak("palette", v)}
+            />
+            <div style={{ fontFamily: "var(--f-head)", fontSize: 11, color: "rgba(41,38,27,0.55)", marginTop: -2 }}>
+              {PALETTES[activePaletteIndex].name} — {PALETTES[activePaletteIndex].sub}
+            </div>
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    function ComingSoon({ page, setPage }) {
+      const titles = {
+        service:    ["Digitales Mieterbüro", "Schadenmeldung, Downloads, Mietertreff — der gesamte Serviceapparat als eigene Sektion."],
+        ueberuns:   ["Über uns",              "Geschichte seit 1949, Vorstand & Aufsichtsrat, Team-Vorstellung mit Fotos."],
+        aktuelles:  ["Aktuelles",             "Blog-Format mit Sanierungen, Nachbarschaftsterminen, Mitgliederversammlungen."],
+      };
+      const [title, desc] = titles[page] || ["—", ""];
+      return (
+        <section className="page-head" style={{ minHeight: "60vh" }} data-screen-label={"Placeholder — " + title}>
+          <div className="wrap">
+            <div className="crumb">{title}</div>
+            <h1 style={{ maxWidth: 720 }}>Diese Seite folgt im nächsten Sprint.</h1>
+            <p className="lead">{desc}</p>
+            <div style={{ marginTop: 28 }}>
+              <button className="btn btn-primary btn-arrow" onClick={() => setPage("start")}>Zurück zur Startseite</button>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
