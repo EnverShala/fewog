@@ -13,7 +13,7 @@ export function ContactStrip() {
         </div>
       </div>
       <div className="contact-cell">
-        <div className="lbl"><Icon.phone /> Kontakt</div>
+        <div className="lbl"><Icon.contact /> Kontakt</div>
         <div className="val">
           <a href="tel:+4971157881500">0711 578815-0</a>
           <small>Fax: 0711 578815-90</small>

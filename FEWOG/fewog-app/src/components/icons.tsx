@@ -67,4 +67,12 @@ export const Icon = {
       <path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5"/>
     </svg>
   ),
+  contact: () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <circle cx="9" cy="11" r="2.5"/>
+      <path d="M5 19c0-2.8 1.8-4 4-4"/>
+      <path d="M13 9h4M13 13h3"/>
+    </svg>
+  ),
 };
