@@ -1,76 +1,121 @@
 # Testing
 
-**Analysis Date:** 2026-05-18
+**Analysis Date:** 2026-05-19
 
 ## Test Framework
 
-**Installed:** None
+**Installed:** None.
 
-No test framework is listed in `package.json` (neither in `dependencies` nor `devDependencies`). The following are absent:
-- `jest` / `@jest/globals` / `ts-jest` / `babel-jest`
-- `vitest` / `@vitest/ui`
-- `@testing-library/react` / `@testing-library/jest-dom`
-- `playwright` / `@playwright/test`
+No test framework appears in `fewog-app/package.json` — neither in `dependencies` nor `devDependencies`. The following are all absent:
+
+- `jest`, `@jest/globals`, `ts-jest`, `babel-jest`
+- `vitest`, `@vitest/ui`, `@vitest/coverage-v8`
+- `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`
+- `playwright`, `@playwright/test`
 - `cypress`
 
-The only test-adjacent tool present is `eslint` (for static analysis / linting), run via `npm run lint`.
+The only test-adjacent tooling present is ESLint (static analysis), run via `npm run lint`.
 
-## Test Coverage
+## Test Files Found
 
-**Existing test files:** None found.
+**Zero test files exist in the codebase.**
 
-A full search for `*.test.*`, `*.spec.*`, and `__tests__/` directories across `fewog-app/` returned no results. There are zero automated tests in the codebase at this stage.
+A full search for `*.test.*`, `*.spec.*`, and `__tests__/` directories across `fewog-app/src/` returned no results.
 
-## Testing Gaps
+## Test Commands
 
-The entire application is untested. High-priority gaps once testing is added:
+```bash
+npm run lint    # ESLint only — the sole automated quality check available
+```
 
-**Critical paths with no tests:**
+No `test` script is defined in `fewog-app/package.json`. `npm test` will fail.
 
-- `src/lib/data.ts` — `FEWOG_DATA` constant structure: property list integrity (50 entries, required fields, valid district IDs). This is pure data — easiest to test first.
-- `src/components/nav.tsx` — Navigation routing logic (`go()` function dispatches to correct routes; active link state reflects current page).
-- `src/app/wohnen/page.tsx` — Property list grouping logic (`grouped` memo groups by first letter, sorts alphabetically); detail panel open/close state; scroll-to-detail side effect.
-- `src/app/page.tsx` — `useEffect` navigation side effect (navigates to `/wohnen` when `page === 'wohnen'`).
-- All components: basic render smoke tests (no crashes with required props).
+## What Is Tested
 
-**Accessibility / integration gaps:**
-- No WCAG 2.1 AA accessibility checks (required for public institution — see CLAUDE.md constraints).
-- No end-to-end navigation tests across the five route pages.
+Nothing. There is no automated test coverage at this stage.
 
-## Testing Approach (observed vs planned)
+## What Is Not Tested (Gaps)
 
-**Observed:** No testing infrastructure or conventions are established.
+The entire application is untested. Priority areas once a test framework is added:
 
-**Recommended approach for this stack (Next.js 15/16 + React 19 + TypeScript 5):**
+**High priority — pure logic, no DOM setup required:**
+- `src/lib/data.ts` — `FEWOG_DATA` constant integrity: 50 property entries, required fields present on each, valid `district` IDs referencing entries in `FEWOG_DATA.districts`, no duplicate `id` values.
 
-**Unit / component tests — Vitest + Testing Library:**
+**High priority — component logic:**
+- `src/components/nav.tsx` — `go()` function routes to correct paths for each nav key; active link class reflects current `page` prop; mobile menu toggle (`open` state).
+- `src/app/wohnen/page.tsx` — `grouped` memo groups properties by first letter of street name and sorts alphabetically; `filtered` memo sorts by German locale; detail panel opens on row click and closes via `closeDetail()`; touch swipe gesture triggers `closeDetail()` when delta > 80px.
+- `src/app/page.tsx` — `useEffect` navigates to `/wohnen` when `page === 'wohnen'`; other page values reset state.
+
+**Medium priority — smoke tests (render without crash):**
+- `src/components/footer.tsx` — renders with no props
+- `src/components/contact-strip.tsx` — renders with no props
+- `src/components/service-tile.tsx` — renders with `href` prop (anchor variant) and with `onClick` prop (div variant)
+- `src/components/icons.tsx` — each icon in the `Icon` namespace renders without throwing
+
+**Accessibility gaps (required per CLAUDE.md — WCAG 2.1 AA for public institution):**
+- No automated accessibility checks (e.g., `axe-core` / `@axe-core/react`) are present
+- `<img>` tags in `src/app/wohnen/page.tsx` and `src/app/page.tsx` have `alt` attributes, but no automated check enforces this
+- `<a>` tags in `src/components/nav.tsx` have no `href` attribute (they rely on `onClick` only) — not tested
+
+**End-to-end navigation gaps:**
+- No e2e tests for the five routes: `/`, `/wohnen`, `/ueberuns`, `/aktuelles`, `/service`
+
+## Recommended Setup (for when testing is introduced)
+
+**Unit and component tests — Vitest + Testing Library:**
+
 ```bash
 npm install -D vitest @vitest/ui jsdom @testing-library/react @testing-library/jest-dom
 ```
-- Config file: `vitest.config.ts` at project root
-- Test files: co-located with source, named `*.test.tsx` / `*.test.ts`
-- Example location: `src/lib/data.test.ts`, `src/components/nav.test.tsx`
+
+Config file: `fewog-app/vitest.config.ts`
+
+```ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+  },
+});
+```
+
+Test file locations: co-located with source, e.g.:
+- `src/lib/data.test.ts`
+- `src/components/nav.test.tsx`
+- `src/components/service-tile.test.tsx`
 
 **End-to-end tests — Playwright:**
+
 ```bash
 npm install -D @playwright/test
 npx playwright install
 ```
-- Config file: `playwright.config.ts` at project root
-- Test files: `src/e2e/` directory, named `*.spec.ts`
+
+Config file: `fewog-app/playwright.config.ts`
+Test files: `src/e2e/*.spec.ts`
 
 **Run commands (once set up):**
+
 ```bash
-npx vitest            # Run unit tests (watch mode)
-npx vitest run        # Run unit tests once
+npx vitest            # Unit tests in watch mode
+npx vitest run        # Unit tests single run
 npx vitest --coverage # With coverage report
-npx playwright test   # Run e2e tests
+npx playwright test   # E2e tests
+npm run lint          # ESLint (currently the only check)
 ```
 
 **Priority order for adding tests:**
-1. `src/lib/data.ts` — pure data validation (no DOM, no setup needed)
-2. `src/components/service-tile.tsx` — small, props-only component (easy smoke test)
-3. `src/components/contact-strip.tsx` — no props, static render
-4. `src/components/nav.tsx` — routing and active state logic
-5. `src/app/wohnen/page.tsx` — grouping logic and detail panel state
-6. E2E: page navigation flow across all five routes
+1. `src/lib/data.ts` — pure data validation, no DOM or mocking needed
+2. `src/components/service-tile.tsx` — small, deterministic, props-only component
+3. `src/components/contact-strip.tsx` — no props, fully static render
+4. `src/components/nav.tsx` — routing logic and active state
+5. `src/app/wohnen/page.tsx` — grouping/filtering memos and detail panel state
+6. E2e: five-page navigation smoke test
+
+---
+
+*Testing analysis: 2026-05-19*

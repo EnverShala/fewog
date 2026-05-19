@@ -1,142 +1,214 @@
-# File & Directory Structure
+# Codebase Structure
 
-**Analysis Date:** 2026-05-18
+**Analysis Date:** 2026-05-19
 
-## Directory Tree (source files only, no node_modules)
+## Directory Layout
 
 ```
-fewog-app/
-├── next.config.ts          # Next.js config (currently empty placeholder)
-├── tsconfig.json           # TypeScript config; path alias @/* → ./src/*
-├── postcss.config.mjs      # PostCSS config (for Tailwind CSS v4)
-├── eslint.config.mjs       # ESLint flat config
-├── public/                 # Static assets (SVG placeholders only)
-│   ├── file.svg
-│   ├── globe.svg
-│   ├── next.svg
-│   ├── vercel.svg
-│   └── window.svg
-└── src/
-    ├── app/                # Next.js App Router pages
-    │   ├── layout.tsx      # Root layout — only server component; fonts + global CSS
-    │   ├── page.tsx        # Home page (/)
-    │   ├── globals.css     # Global styles + FEWOG design tokens + Tailwind import
-    │   ├── favicon.ico
-    │   ├── aktuelles/
-    │   │   └── page.tsx    # /aktuelles — static news content
-    │   ├── service/
-    │   │   └── page.tsx    # /service — service offerings content
-    │   ├── ueberuns/
-    │   │   └── page.tsx    # /ueberuns — about / history / governance
-    │   └── wohnen/
-    │       └── page.tsx    # /wohnen — A-Z property listing with detail panel
-    ├── components/         # Shared UI components (all client components)
-    │   ├── contact-strip.tsx   # Office hours / phone / address bar
-    │   ├── footer.tsx          # Site footer with nav links
-    │   ├── icons.tsx           # Inline SVG icon namespace (Icon.*)
-    │   ├── nav.tsx             # Site navigation with mobile menu
-    │   └── service-tile.tsx    # Icon + title + desc card primitive
-    ├── lib/                # Utilities and data
-    │   └── data.ts         # FEWOG_DATA constant + Property/District/FewogData types
-    └── types/              # (directory exists, currently empty)
+FEWOG/                          # Repo root
+├── CLAUDE.md                   # Project instructions and tech stack reference
+├── Design/                     # Original HTML/JSX prototype (reference only)
+│   ├── FEWOG Fellbach.html     # Single-file HTML prototype
+│   ├── components.jsx          # React prototype components
+│   ├── views.jsx               # React prototype page views
+│   ├── data.js                 # Prototype data (superseded by src/lib/data.ts)
+│   ├── styles.css              # Prototype styles (reference for globals.css)
+│   ├── tweaks-panel.jsx        # Design tweaks panel UI
+│   └── uploads/                # Design reference images
+├── fewog-app/                  # Next.js application (primary working directory)
+│   ├── next.config.ts          # Next.js config (currently empty placeholder)
+│   ├── tsconfig.json           # TypeScript config; path alias @/* → ./src/*
+│   ├── package.json            # Dependencies and scripts
+│   ├── public/                 # Static assets (default Next.js SVG placeholders only)
+│   └── src/
+│       ├── app/                # Next.js App Router — pages and global styles
+│       │   ├── layout.tsx      # Root layout — only true server component
+│       │   ├── page.tsx        # Home page (/)
+│       │   ├── globals.css     # Global CSS: FEWOG design tokens + component styles + Tailwind
+│       │   ├── favicon.ico
+│       │   ├── aktuelles/
+│       │   │   └── page.tsx    # /aktuelles — news and announcements
+│       │   ├── service/
+│       │   │   └── page.tsx    # /service — services, downloads, room rentals
+│       │   ├── ueberuns/
+│       │   │   └── page.tsx    # /ueberuns — history, governance, Satzung
+│       │   └── wohnen/
+│       │       └── page.tsx    # /wohnen — A–Z property listing with detail panel
+│       ├── components/         # Shared UI components (all 'use client')
+│       │   ├── contact-strip.tsx
+│       │   ├── footer.tsx
+│       │   ├── icons.tsx
+│       │   ├── nav.tsx
+│       │   └── service-tile.tsx
+│       ├── lib/                # Data and utilities
+│       │   └── data.ts         # FEWOG_DATA constant + TypeScript interfaces
+│       └── types/              # (directory exists, currently empty)
+└── .planning/                  # GSD planning artifacts
+    └── codebase/               # Codebase map documents
 ```
+
+## Directory Purposes
+
+**`Design/`:**
+- Purpose: Original prototype files used to build the current app — reference material only
+- Contains: JSX components, JS data, HTML prototype, CSS prototype
+- Key files: `components.jsx` (prototype UI), `data.js` (original data structure), `styles.css` (design reference)
+- Status: Not imported by the Next.js app — do not modify
+
+**`fewog-app/src/app/`:**
+- Purpose: Next.js App Router pages and global styles
+- Contains: `layout.tsx` (root), one `page.tsx` per route, `globals.css`
+- Key files: `layout.tsx` (server component shell), `wohnen/page.tsx` (most complex page)
+
+**`fewog-app/src/components/`:**
+- Purpose: Reusable UI components shared across pages
+- Contains: `nav.tsx`, `footer.tsx`, `contact-strip.tsx`, `service-tile.tsx`, `icons.tsx`
+- Structure: Flat — no subdirectories
+
+**`fewog-app/src/lib/`:**
+- Purpose: Data layer and shared utilities
+- Contains: `data.ts` — the entire data layer (50 properties, 3 districts, site meta)
+- Future: Will be replaced/supplemented by Sanity queries when CMS is integrated
+
+**`fewog-app/src/types/`:**
+- Purpose: Intended for shared TypeScript type definitions
+- Current state: Directory exists but is empty — types are co-located in `src/lib/data.ts`
+
+**`fewog-app/public/`:**
+- Purpose: Static files served at root URL (`/filename`)
+- Current contents: Default Next.js placeholder SVGs only — no FEWOG-specific assets
+
+## Key File Locations
+
+**Entry Points:**
+- `fewog-app/src/app/layout.tsx` — Root HTML shell (server component)
+- `fewog-app/src/app/page.tsx` — Home page (`/`)
+- `fewog-app/src/app/wohnen/page.tsx` — Property listing page (`/wohnen`)
+
+**Global Styles:**
+- `fewog-app/src/app/globals.css` — All CSS: design tokens, layout primitives, component styles, responsive breakpoints (~780 lines)
+
+**Data:**
+- `fewog-app/src/lib/data.ts` — `FEWOG_DATA` constant + `Property`, `District`, `FewogData` interfaces
+
+**Navigation:**
+- `fewog-app/src/components/nav.tsx` — Sticky nav, mobile hamburger, `useRouter()` navigation
+
+**Icons:**
+- `fewog-app/src/components/icons.tsx` — All SVG icons as `Icon.*` named exports
+
+**Configuration:**
+- `fewog-app/next.config.ts` — Empty Next.js config (needs `remotePatterns` when `next/image` is adopted)
+- `fewog-app/tsconfig.json` — TypeScript; `@/*` alias maps to `./src/*`
+- `fewog-app/package.json` — Dependencies: Next.js 15.5.18, React 19.2.4, Sanity 5.x, Tailwind 4.x
 
 ## Page Inventory
 
-| Route | File | Rendering | Notes |
-|-------|------|-----------|-------|
-| `/` | `src/app/page.tsx` | CSR (`'use client'`) | Hero, service dock, contact strip; reads FEWOG_DATA meta stats |
-| `/wohnen` | `src/app/wohnen/page.tsx` | CSR (`'use client'`) | A-Z list of 50 properties; click-to-expand detail panel; reads full FEWOG_DATA.properties |
-| `/aktuelles` | `src/app/aktuelles/page.tsx` | CSR (`'use client'`) | Hardcoded news items: Mängelmeldung, Wohnungssuchende, METRONA, Mietertreff |
-| `/service` | `src/app/service/page.tsx` | CSR (`'use client'`) | Hardcoded services: Mietertreff, Mietermagazin, Geschäftsbericht, Ferienwohnungen, Veranstaltungsraum |
-| `/ueberuns` | `src/app/ueberuns/page.tsx` | CSR (`'use client'`) | Hardcoded: Historie, Entwicklung, Organe (board members), Satzung download |
-
-**Root layout:** `src/app/layout.tsx` — Server Component; wraps all routes with Geist fonts and `globals.css`.
+| Route | File | Rendering | Key state | Content source |
+|-------|------|-----------|-----------|----------------|
+| `/` | `src/app/page.tsx` | CSR | `page: string` | `FEWOG_DATA.meta` + hardcoded |
+| `/wohnen` | `src/app/wohnen/page.tsx` | CSR | `selectedProperty: Property \| null` | `FEWOG_DATA.properties` (50 items) |
+| `/aktuelles` | `src/app/aktuelles/page.tsx` | CSR | `page: string` | Hardcoded JSX |
+| `/service` | `src/app/service/page.tsx` | CSR | `page: string` | Hardcoded JSX |
+| `/ueberuns` | `src/app/ueberuns/page.tsx` | CSR | `page: string` | Hardcoded JSX |
 
 ## Component Inventory
 
-| Component | File | Type | Used By |
-|-----------|------|------|---------|
-| `Nav` | `src/components/nav.tsx` | Client | All 5 page files |
-| `Footer` | `src/components/footer.tsx` | Client | All 5 page files |
-| `ContactStrip` | `src/components/contact-strip.tsx` | Client | `src/app/page.tsx` (homepage only) |
-| `ServiceTile` | `src/components/service-tile.tsx` | Client | `src/app/page.tsx` (service dock section) |
-| `Icon` | `src/components/icons.tsx` | Client | `src/components/nav.tsx`, `src/components/contact-strip.tsx`, `src/app/page.tsx` |
+| Component | File | Props | Used By |
+|-----------|------|-------|---------|
+| `Nav` | `src/components/nav.tsx` | `page: string`, `setPage: (p: string) => void` | All 5 page files |
+| `Footer` | `src/components/footer.tsx` | none | All 5 page files |
+| `ContactStrip` | `src/components/contact-strip.tsx` | none | `src/app/page.tsx` only |
+| `ServiceTile` | `src/components/service-tile.tsx` | `icon`, `title`, `desc`, `href?`, `onClick?` | `src/app/page.tsx` only |
+| `Icon` | `src/components/icons.tsx` | (namespace object, not a component) | `nav.tsx`, `contact-strip.tsx`, `src/app/page.tsx` |
 
-**Icon exports:** `Icon.arrow`, `Icon.search`, `Icon.close`, `Icon.burger`, `Icon.phone`, `Icon.mail`, `Icon.clock`, `Icon.wrench`, `Icon.community`, `Icon.doc`, `Icon.leaf`, `Icon.home`, `Icon.pin`
-
-## Data Layer
-
-**`src/lib/data.ts`:**
-
-- Exports: `FEWOG_DATA` (const), `Property` (interface), `District` (interface), `FewogData` (interface)
-- All data is hardcoded at compile time — no runtime fetching
-- `FEWOG_DATA.meta`: `{ founded: 1949, units: 612, members: 1480, properties: 50, city: "Fellbach" }`
-- `FEWOG_DATA.districts`: 3 entries (kern, schmiden, oeffingen) with SVG path data for a stylized map
-- `FEWOG_DATA.properties`: 50 entries; each has `id`, `district`, `street`, `year`, `units`, `rooms`, `sanierung`, `imageUrl`, `pos` (optional SVG coordinates)
-- Property images link directly to `fewog.de` CDN (`https://www.fewog.de/fileadmin/_processed_/...`)
-- `src/types/` directory exists but contains no files
+**Available Icon keys:** `arrow`, `search`, `close`, `burger`, `phone`, `mail`, `clock`, `wrench`, `community`, `doc`, `leaf`, `home`, `pin`
 
 ## Naming Conventions
 
 **Files:**
-- Pages: `page.tsx` (Next.js App Router convention)
+- Pages: `page.tsx` (Next.js App Router convention — never deviate)
 - Components: `kebab-case.tsx` (e.g., `contact-strip.tsx`, `service-tile.tsx`)
-- Data/lib: `kebab-case.ts` (e.g., `data.ts`)
+- Data/lib modules: `kebab-case.ts` (e.g., `data.ts`)
+- Layouts: `layout.tsx` (App Router convention)
 
 **Directories:**
 - Route segments: lowercase German slugs (e.g., `wohnen`, `ueberuns`, `aktuelles`, `service`)
-- Component directory: `components/` (flat, no subdirectories)
+- Component directory: `components/` (flat — no subdirectories currently)
 
 **Exports:**
 - Components: Named exports with PascalCase (`export function Nav`, `export function Footer`)
-- Data: Named constant export (`export const FEWOG_DATA`)
-- Interfaces: Named TypeScript interfaces (`export interface Property`)
+- Data constants: Named uppercase constant (`export const FEWOG_DATA`)
+- TypeScript interfaces: Named PascalCase interfaces (`export interface Property`, `export interface District`)
+
+**CSS classes:** Semantic BEM-inspired names matching component roles (`.nav`, `.nav-inner`, `.nav-link`, `.hero`, `.hero-grid`, `.bestand-row`, `.service-tile`) — all defined in `globals.css`.
+
+**Import paths:** Always use the `@/` alias for `src/` imports (e.g., `import { Nav } from '@/components/nav'`, `import { FEWOG_DATA } from '@/lib/data'`).
 
 ## Where to Add New Code
 
-**New page/route:**
-- Create `src/app/<route-slug>/page.tsx`
-- Follow pattern: `'use client'` directive, import `Nav` and `Footer`, local `useState('route-key')`
-- Note: Once the shared layout anti-pattern is resolved, omit Nav/Footer and use the shared layout instead
+**New route/page:**
+1. Create `fewog-app/src/app/<route-slug>/page.tsx`
+2. Add `'use client'` directive (current convention — all pages are client components)
+3. Import `Nav` and `Footer` from `@/components/`
+4. Add `const [page, setPage] = useState('<route-slug>')` for nav active state
+5. Pass `page` and `setPage` to `<Nav>`
+6. Register the route key in `Nav`'s `go()` function in `src/components/nav.tsx` if it's a new slug
 
 **New shared UI component:**
-- Add to `src/components/<name>.tsx` as a named export
-- Add `'use client'` if it uses hooks or browser APIs
+- Add to `fewog-app/src/components/<component-name>.tsx` as a named export
+- Add `'use client'` if it uses any React hooks or browser APIs
+- Use CSS classes defined in `globals.css` or add new classes there
 
 **New icon:**
-- Add to the `Icon` object in `src/components/icons.tsx`
+- Add a new key to the `Icon` object in `fewog-app/src/components/icons.tsx`
+- Use the same SVG style: `width/height` attribute, `fill="none"`, `stroke="currentColor"`, `strokeWidth="2"`
 
-**New data type or content:**
-- Add interface to `src/lib/data.ts`
-- Add data to `FEWOG_DATA` constant
-- When Sanity is integrated, this file will be replaced by CMS-fetched data using `defineLive`
+**New CSS component styles:**
+- Add to `fewog-app/src/app/globals.css` — do not create per-component CSS files; the project uses a single global stylesheet
 
-**Static assets:**
-- Place in `public/` — accessible at `/<filename>`
+**New data type or static content:**
+- Add interface to `fewog-app/src/lib/data.ts`
+- Add data to the `FEWOG_DATA` constant
+- When Sanity is integrated, this module will be replaced by CMS-fetched queries using `defineLive`
+
+**Static assets (images, PDFs):**
+- Place in `fewog-app/public/` — accessible at `/<filename>` with no path prefix
+- Currently: no FEWOG assets in `public/`; property images are hotlinked from `fewog.de`
 
 **Path alias:**
-- Use `@/` prefix for all `src/` imports (e.g., `import { Nav } from '@/components/nav'`)
+- Use `@/` for all `src/` imports: `import X from '@/components/x'` not `'../../components/x'`
 
 ## Special Directories
 
-**`public/`:**
-- Purpose: Static file serving — accessible directly at root URL path
+**`Design/`:**
+- Purpose: Original HTML/JSX prototype — design reference
 - Generated: No
 - Committed: Yes
-- Current contents: Only default Next.js placeholder SVGs; no FEWOG-specific assets yet
+- Do not import from this directory in the Next.js app
 
-**`src/types/`:**
-- Purpose: Intended for shared TypeScript type definitions
+**`fewog-app/public/`:**
+- Purpose: Static file serving — files accessible at root URL
+- Generated: No
+- Committed: Yes
+- Current contents: Default Next.js placeholder SVGs (`file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`)
+
+**`fewog-app/src/types/`:**
+- Purpose: Shared TypeScript type definitions
 - Generated: No
 - Committed: Yes (empty)
-- Note: Currently unused; types are co-located in `src/lib/data.ts`
+- Current state: Unused — types live in `src/lib/data.ts`; Sanity TypeGen output will go here when integrated
 
-**`.next/`:**
-- Purpose: Next.js build output and dev cache
+**`fewog-app/.next/`:**
+- Purpose: Next.js build output and dev server cache
 - Generated: Yes
-- Committed: No (in `.gitignore`)
+- Committed: No (`.gitignore`)
+
+**`.planning/`:**
+- Purpose: GSD workflow planning artifacts (phases, codebase maps, quick task logs)
+- Generated: By GSD commands
+- Committed: Yes
 
 ---
 
-*Structure analysis: 2026-05-18*
+*Structure analysis: 2026-05-19*

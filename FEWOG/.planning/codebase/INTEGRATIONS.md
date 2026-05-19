@@ -1,34 +1,45 @@
 # External Integrations
 
-**Analysis Date:** 2026-05-18
+**Analysis Date:** 2026-05-19
 
 ## CMS / Content
 
-**Sanity v3 — Planned, Not Yet Configured**
+**Sanity v3 — Installed but Not Yet Configured**
 
-- `sanity` 5.25.0 and `next-sanity` 11.6.13 are installed in `fewog-app/package.json`
-- `@sanity/locale-de-de` 1.1.31 is installed (German Studio UI locale)
-- `@sanity/image-url` 2.1.1 and `@portabletext/react` 6.2.0 are installed
-- No `sanity.config.ts`, `sanity.cli.ts`, or `schemaTypes/` directory exists in `fewog-app/`
+- `sanity` `^5.25.0` and `next-sanity` `^11.6.13` are in `fewog-app/package.json`
+- `@sanity/locale-de-de` `^1.1.31` installed (German Studio UI locale)
+- `@sanity/image-url` `^2.1.1` and `@portabletext/react` `^6.2.0` installed
+- No `sanity.config.ts`, `sanity.cli.ts`, or `schemaTypes/` directory exists
 - No embedded Studio route (`src/app/studio/`) exists
-- No Sanity environment variables (`NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET`, `SANITY_API_READ_TOKEN`) are referenced anywhere in source files
-- No `defineLive` / `SanityLive` usage found in any source file
-- All current content is **hardcoded** in `src/lib/data.ts` (50 properties, 3 districts, org metadata) and in static JSX in route pages
+- No Sanity environment variables (`NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET`, `SANITY_API_READ_TOKEN`) referenced in any source file
+- No `defineLive` / `SanityLive` usage in any source file
 
-**Current content sources:**
-- Property data: `src/lib/data.ts` — `FEWOG_DATA` constant with typed interfaces
-- News/Aktuelles: static HTML in `src/app/aktuelles/page.tsx`
-- Über Uns: static HTML in `src/app/ueberuns/page.tsx`
-- Service: static HTML in `src/app/service/page.tsx`
-- Images: hotlinked from `fewog.de` CDN (`https://www.fewog.de/fileadmin/_processed_/...`) and Unsplash (`https://images.unsplash.com/...`)
+**Current content sources (all static/hardcoded):**
+- Property data: `fewog-app/src/lib/data.ts` — `FEWOG_DATA` constant (50 properties, 3 districts, org meta) with TypeScript interfaces
+- News/Aktuelles: static JSX in `fewog-app/src/app/aktuelles/page.tsx`
+- Über Uns: static JSX in `fewog-app/src/app/ueberuns/page.tsx`
+- Service: static JSX in `fewog-app/src/app/service/page.tsx`
+
+## Image Handling
+
+**Current approach — hotlinked external images (prototype only):**
+- Property images in `fewog-app/src/lib/data.ts`: hotlinked from `https://www.fewog.de/fileadmin/_processed_/...`
+  - Many entries use a placeholder (`csm_dummy_c2f4919c03.jpg`)
+- Hero image in `fewog-app/src/app/page.tsx`: hotlinked from `https://images.unsplash.com/...`
+- All rendered via plain `<img>` tags — **`next/image` is not used anywhere**
+
+**Planned approach (per CLAUDE.md):**
+- `next-sanity/image` loader pointing to Sanity CDN (`cdn.sanity.io`)
+- `@sanity/image-url` for CDN transform URLs
+- Requires `NEXT_PUBLIC_SANITY_PROJECT_ID` and `NEXT_PUBLIC_SANITY_DATASET` env vars
 
 ## Authentication
 
 **Status: None**
 
-- No authentication library installed or referenced
-- No protected routes, session management, or user login flow
-- Sanity Studio (when added) will use Sanity's built-in auth via sanity.io accounts
+- No authentication library installed
+- No protected routes, session management, or login flow
+- Sanity Studio (when embedded) will use Sanity's built-in auth via sanity.io accounts
 
 ## Analytics / Monitoring
 
@@ -36,61 +47,54 @@
 
 - No analytics package installed (no Google Analytics, Plausible, Fathom, etc.)
 - No error tracking (no Sentry, Datadog, etc.)
-- No `<Script>` tags or third-party tracking snippets found in `src/app/layout.tsx`
-- CLAUDE.md constraint: "Keine Analytics ohne Einwilligung" — any future analytics requires a cookie consent mechanism
+- No `<Script>` tags or third-party tracking in `fewog-app/src/app/layout.tsx`
+- CLAUDE.md constraint: "Keine Analytics ohne Einwilligung" — any future analytics requires a cookie consent mechanism first
 
 ## Deployment / Hosting
 
-**Status: Not yet deployed (prototype only)**
+**Status: Not yet deployed (local prototype only)**
 
 - Target platform: **Vercel** (Free Tier) per CLAUDE.md
-- No `vercel.json` configuration file found in the repo
-- No CI/CD pipeline configured (no GitHub Actions workflows found)
-- No custom domain configuration present
-- Vercel Git-based auto-deployment is the intended workflow once connected
+- No `vercel.json` configuration file in the repo
+- No CI/CD pipeline configured (no GitHub Actions workflows)
+- No custom domain configuration
+- Intended workflow: Vercel Git-based auto-deployment once connected
 
 **Required environment variables for production (not yet set):**
 - `NEXT_PUBLIC_SANITY_PROJECT_ID`
 - `NEXT_PUBLIC_SANITY_DATASET`
-- `SANITY_API_READ_TOKEN` (Viewer-level token for `defineLive` / SanityLive)
+- `SANITY_API_READ_TOKEN` — Viewer-level token for `defineLive` / `SanityLive`
 
-## Third-party APIs
+## External Link Dependencies (not API integrations)
 
-**Unsplash (image hotlinking)**
-- One Unsplash image hotlinked in `src/app/page.tsx`: hero section (`images.unsplash.com`)
-- Not an API integration — direct `<img>` src URL, no API key, not going through `next/image`
+**fewog.de legacy site:**
+- Property images hotlinked from `www.fewog.de/fileadmin/_processed_/...` (`fewog-app/src/lib/data.ts`)
+- PDF documents linked from `www.fewog.de/fileadmin/PDF/...` in service and about pages
 
-**fewog.de CDN (legacy image hotlinking)**
-- Property images in `src/lib/data.ts` are hotlinked from the live fewog.de site (`www.fewog.de/fileadmin/_processed_/...`)
-- Many entries use a placeholder image (`csm_dummy_c2f4919c03.jpg`)
-- This is a prototype dependency on the existing site's CDN — not a formal integration
+**Unsplash:**
+- One hero image hotlinked (`images.unsplash.com`) in `fewog-app/src/app/page.tsx` — no API key
 
-**External PDF links**
-- `src/app/service/page.tsx` and `src/app/ueberuns/page.tsx` link directly to PDFs hosted on `www.fewog.de/fileadmin/PDF/...`
-- These are `<a href>` links to the legacy site, not API calls
+**Brunata / METRONA tenant portal:**
+- External link to `nutzerportal.brunata-muenchen.de` in `fewog-app/src/app/aktuelles/page.tsx` — no API integration
 
-**METRONA / Brunata**
-- `src/app/aktuelles/page.tsx` links to `nutzerportal.brunata-muenchen.de` (third-party tenant utility portal)
-- External link only — no API integration
-
-**ImmobilienScout24**
-- `src/app/aktuelles/page.tsx` links to `immoscout.de` for overflow housing listings
-- External link only
+**ImmobilienScout24:**
+- External link to `immoscout.de` in `fewog-app/src/app/aktuelles/page.tsx` — no API integration
 
 ## Integration Gaps (planned but not yet implemented)
 
 Based on CLAUDE.md and installed-but-unconfigured packages:
 
-1. **Sanity Studio setup** — `sanity.config.ts`, schema types for Liegenschaft / Neuigkeit / Teammitglied / Dokument / Seiteneinstellungen, embedded `/studio` route
-2. **Sanity content fetching** — Replace `src/lib/data.ts` hardcoded data and static page content with `defineLive` queries + `<SanityLive />`
-3. **Sanity image handling** — Replace hotlinked fewog.de and Unsplash images with `next-sanity/image` loader pointing to Sanity CDN
-4. **sanity-plugin-media** — Media browser plugin not yet installed; needed for non-technical content editors
-5. **DSGVO / Datenschutz page** — Required by CLAUDE.md; not yet created (`/datenschutz` route missing)
-6. **Impressum page** — Standard German legal requirement; not yet created
-7. **Damage report form (Mängelmelder)** — Referenced in homepage service tile and `aktuelles` page; no form implementation exists
-8. **Sanity CORS configuration** — Must add `https://fewog.de` and local dev origins to Sanity project CORS settings before Studio is usable
-9. **Vercel integration** — Production deployment not yet connected; Vercel official Sanity integration (optional) not configured
+1. **Sanity project initialization** — `sanity.config.ts`, `sanity.cli.ts`, schema types for Liegenschaft / Neuigkeit / Teammitglied / Dokument / Seiteneinstellungen
+2. **Embedded Studio route** — `fewog-app/src/app/studio/[[...tool]]/page.tsx`
+3. **Sanity content fetching** — Replace `src/lib/data.ts` and static pages with `defineLive` queries + `<SanityLive />`
+4. **Sanity image migration** — Replace hotlinked images with Sanity CDN via `next-sanity/image` loader
+5. **`sanity-plugin-media`** — Media browser plugin not yet installed
+6. **Sanity CORS configuration** — Must add `https://fewog.de` and `http://localhost:3000` to Sanity project CORS settings
+7. **DSGVO / Datenschutz page** — Required by CLAUDE.md (`/datenschutz` route missing)
+8. **Impressum page** — Required German legal page; not yet created
+9. **Damage report form (Mängelmelder)** — Referenced in homepage service tile; no form implementation exists
+10. **Vercel connection** — Production deployment not yet configured
 
 ---
 
-*Integration audit: 2026-05-18*
+*Integration audit: 2026-05-19*
