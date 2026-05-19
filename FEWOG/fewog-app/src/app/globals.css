@@ -568,11 +568,8 @@ a:hover { text-decoration: none; }
   /* Info grid */
   .info-grid { grid-template-columns: 1fr; }
 
-  /* Bestand — Liste edge-to-edge, gleicher Abstand links/rechts */
+  /* Bestand */
   .bestand { padding: 20px 0; }
-  .bestand-list { margin: 0 -16px; }
-  .bestand-row { padding: 16px 16px; }
-  .bestand-letter { padding: 12px 16px 6px; }
 
   /* Detail-Panel: von rechts über die Liste schieben */
   .bestand-detail-col {
