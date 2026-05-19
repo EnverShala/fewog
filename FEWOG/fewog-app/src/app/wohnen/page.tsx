@@ -35,7 +35,13 @@ export default function WohnenPage() {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (!detailRef.current) return;
     if (delta > 80) {
-      closeDetail();
+      // Re-enable transition while transform is still at the dragged position,
+      // then change transform on the next frame so the browser has a start state to animate from.
+      detailRef.current.style.transition = 'transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      requestAnimationFrame(() => {
+        if (detailRef.current) detailRef.current.style.transform = 'translateX(100%)';
+      });
+      setTimeout(() => setSelectedProperty(null), 360);
     } else {
       detailRef.current.style.transition = 'transform 0.2s ease-out';
       detailRef.current.style.transform = 'translateX(0)';
