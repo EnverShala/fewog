@@ -31,7 +31,7 @@ export default function AktuellesPage() {
             <p>
               <em>Bitte kontaktieren Sie uns entweder per Mail über </em>
               <a href="mailto:info@fewog.de">info@fewog.de</a>
-              <em> oder telefonisch unter 0711/578815-0. Je genauer Sie den Schaden beschreiben, umso besser können wir reagieren. Vielen Dank.</em>
+              <em> oder telefonisch unter <a href="tel:+4971157881500">0711/578815-0</a>. Je genauer Sie den Schaden beschreiben, umso besser können wir reagieren. Vielen Dank.</em>
             </p>
           </div>
 
