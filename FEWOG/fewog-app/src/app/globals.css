@@ -664,7 +664,7 @@ a:hover { text-decoration: none; }
 }
 .content-block a:hover {
   color: var(--c-secondary);
-  text-decoration: underline;
+  text-decoration: none;
 }
 .content-block .btn-primary { color: var(--c-bg); }
 .content-block .btn-primary:hover { color: var(--c-bg); text-decoration: none; }
