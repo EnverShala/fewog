@@ -1,20 +1,21 @@
-# CONCERNS
-> Last updated: 2026-05-19 | Focus: concerns
+# Codebase Concerns
+
+**Analysis Date:** 2026-05-19
 
 ---
 
-## Critical Issues
+## Critical (blocks production)
 
 ### 1. Sanity CMS not integrated — no CMS at all
 
 Sanity packages are installed (`sanity ^5.25.0`, `next-sanity ^11.6.13`, `@sanity/image-url ^2.1.1`, `@portabletext/react ^6.2.0`, `@sanity/locale-de-de`) in `fewog-app/package.json`, but there is zero Sanity integration in the codebase:
 
-- No `sanity.config.ts` or `sanity.cli.ts` exists anywhere in the repo
-- No Sanity client (`createClient`) is defined
-- No Studio route (`app/studio/[[...tool]]/page.tsx`) exists
-- No schemas exist (`/schemas/` directory absent)
+- No `sanity.config.ts` or `sanity.cli.ts` anywhere in the repo
+- No Sanity client (`createClient`) defined
+- No Studio route (`app/studio/[[...tool]]/page.tsx`)
+- No schemas (`/schemas/` directory absent)
 - No `defineLive` or `<SanityLive />` usage anywhere
-- No `.env.local` file — no environment variables configured
+- No `.env.local` — no environment variables configured
 
 **Impact:** The primary product requirement — "der Genossenschaftsvorstand kann alle Inhalte selbstständig und ohne Programmierkenntnisse pflegen" — is completely unmet. All 50 property records, all news, all team members, and all contact info are hardcoded TypeScript and can only be changed by a developer.
 
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 };
 ```
 
-**Impact:** Google search results, browser tabs, and social sharing previews show "Create Next App" as the FEWOG site title.
+**Impact:** Google search results, browser tabs, and social sharing previews all show "Create Next App" as the FEWOG site title.
 
 **Fix approach:** Replace with FEWOG-specific metadata. Add per-page `generateMetadata` on interior pages.
 
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
 
 `fewog-app/src/app/layout.tsx` line 27 declares `<html lang="en">`. The entire site is in German.
 
-**Impact:** Screen readers use English text-to-speech pronunciation. WCAG 2.1 AA failure (Success Criterion 3.1.1 Language of Page). Browser auto-translation prompts incorrectly in German-speaking regions.
+**Impact:** Screen readers use English text-to-speech pronunciation. WCAG 2.1 AA failure (Success Criterion 3.1.1 Language of Page). Browser auto-translation prompts incorrectly.
 
 **Fix approach:** Change to `<html lang="de">`.
 
@@ -51,17 +52,17 @@ export const metadata: Metadata = {
 
 ### 4. Datenschutz page references Google Analytics and reCAPTCHA — neither is implemented
 
-`fewog-app/src/app/datenschutz/page.tsx` lines 152–183 contain legal text describing Google Analytics and reCAPTCHA usage. Neither service is loaded anywhere in the application. The CLAUDE.md constraint states "Keine Analytics ohne Einwilligung."
+`fewog-app/src/app/datenschutz/page.tsx` lines 152–183 contain legal text describing Google Analytics and reCAPTCHA usage. Neither service is loaded anywhere in the application. CLAUDE.md constraint states "Keine Analytics ohne Einwilligung."
 
 **Impact:** The privacy policy describes services that do not exist on this site. This is a false legal statement and a DSGVO compliance risk.
 
-**Fix approach:** Remove Google Analytics and reCAPTCHA sections from the Datenschutz page (simplest fix matching project constraints), OR implement them with a proper cookie consent banner.
+**Fix approach:** Remove Google Analytics and reCAPTCHA sections from the Datenschutz page, OR implement them with a proper cookie consent banner.
 
 ---
 
 ### 5. No error boundaries, no `error.tsx`, no `not-found.tsx`
 
-There are zero `ErrorBoundary` components and no Next.js App Router error handling files across the entire `fewog-app/src/app/` directory.
+There are zero `ErrorBoundary` components and no Next.js App Router error handling files in `fewog-app/src/app/`.
 
 **Impact:** Any runtime JavaScript error crashes the entire page to a blank screen. A 404 URL shows the default Next.js generic page with "Create Next App" branding.
 
@@ -69,15 +70,15 @@ There are zero `ErrorBoundary` components and no Next.js App Router error handli
 
 ---
 
-## Technical Debt
+## High Priority (fix soon)
 
 ### 6. All 50 properties hardcoded — all assigned to `district: "kern"` only
 
-`fewog-app/src/lib/data.ts` contains 50 hardcoded property records. All 50 are assigned `district: "kern"`. Schmiden and Oeffingen districts are declared but have zero properties assigned to them.
+`fewog-app/src/lib/data.ts` contains 50 hardcoded property records. All 50 are assigned `district: "kern"`. Schmiden and Oeffingen districts are declared but have zero properties assigned.
 
 The Design prototype (`Design/data.js`) had 21 properties spread across all three districts. The app inflated the count to 50 but placed all in Kern.
 
-**Impact:** The `meta.properties` value is 50, but CLAUDE.md and the original prototype both state 27 Liegenschaften — the count displayed publicly is wrong. District filter chips for Schmiden and Oeffingen will always return zero results once filtering is implemented.
+**Impact:** `meta.properties` is 50, but CLAUDE.md and the original prototype both state 27 Liegenschaften — the count displayed publicly is wrong. District filter chips for Schmiden and Oeffingen will always return zero results once filtering is implemented.
 
 **Files:** `fewog-app/src/lib/data.ts` lines 37–124
 
@@ -85,7 +86,7 @@ The Design prototype (`Design/data.js`) had 21 properties spread across all thre
 
 ### 7. 34 of 50 property images use a `csm_dummy` placeholder from the old CDN
 
-The majority of property `imageUrl` entries in `fewog-app/src/lib/data.ts` point to `https://www.fewog.de/fileadmin/_processed_/e/1/csm_dummy_c2f4919c03.jpg` — the old site's generic placeholder. The remaining images also reference `www.fewog.de/fileadmin/_processed_/`, an external CDN with no SLA.
+The majority of property `imageUrl` entries in `fewog-app/src/lib/data.ts` point to `https://www.fewog.de/fileadmin/_processed_/e/1/csm_dummy_c2f4919c03.jpg` — the old site's generic placeholder. Remaining images also reference `www.fewog.de/fileadmin/_processed_/`, an external CDN with no SLA.
 
 **Impact:** If the legacy fewog.de site is decommissioned, 50 property images break simultaneously. Placeholder images are not appropriate for public display.
 
@@ -93,13 +94,13 @@ The majority of property `imageUrl` entries in `fewog-app/src/lib/data.ts` point
 
 ---
 
-### 8. Hero image is an Unsplash stock photo with no FEWOG connection
+### 8. Hero image is an Unsplash stock photo — no connection to FEWOG
 
-`fewog-app/src/app/page.tsx` line 71 uses `https://images.unsplash.com/photo-1502672260266-1c1ef2d93688` — a generic apartment building stock photo. External CDN dependency. Uses `<img>` not `next/image` (no LCP optimization).
+`fewog-app/src/app/page.tsx` line 71 uses `https://images.unsplash.com/photo-1502672260266-1c1ef2d93688` — a generic apartment building stock photo. External CDN dependency. Uses raw `<img>` not `next/image` (no LCP optimization).
 
 ---
 
-### 9. `page` state + `useEffect` navigation on homepage is broken dead code
+### 9. `page` state + `useEffect` navigation on homepage is dead code
 
 `fewog-app/src/app/page.tsx` lines 12–26 maintain a `page` state and navigate via `useEffect`:
 
@@ -108,147 +109,92 @@ useEffect(() => {
   if (page === 'wohnen') {
     window.location.href = '/wohnen';  // full page reload
   } else if (page === 'service') {
-    setPage('start');  // silently does nothing
+    setPage('start');  // no-op
   } else if (page === 'ueberuns') {
-    setPage('start');  // silently does nothing
+    setPage('start');  // no-op
   } else if (page === 'aktuelles') {
-    setPage('start');  // silently does nothing
+    setPage('start');  // no-op
   }
 }, [page]);
 ```
 
-Three of four branches are no-ops. The `window.location.href` on the one working branch triggers a hard reload. The Nav already uses `useRouter().push()` correctly. The comment `// Handle other pages later` (line 19) and `// For other pages that don't exist yet` in `nav.tsx` line 30 confirm this is temporary placeholder logic carried forward.
+Three of four branches are no-ops. The one working branch triggers a hard reload. The Nav already uses `useRouter().push()` correctly. The inline comment `// Handle other pages later` (line 19) confirms this is temporary placeholder logic.
 
 **Files:** `fewog-app/src/app/page.tsx:12-26`, `fewog-app/src/components/nav.tsx:29-30`
 
 ---
 
-### 10. `page`/`setPage` state pattern is redundant and gives wrong active nav item on direct URL load
+### 10. `page`/`setPage` prop pattern is redundant — breaks on direct URL load
 
-Every route file declares `const [page, setPage] = useState('<pagename>')` and passes it to `<Nav page={page} setPage={setPage}>`. The active nav highlight depends on this manually-maintained string, which means the active item is always correct only when navigating through the app — loading `/wohnen` directly shows the correct active state only because `wohnen/page.tsx` hardcodes `useState('wohnen')`. This pattern would silently break if state initialization is forgotten.
+Every route file declares `const [page, setPage] = useState('<pagename>')` and passes it to `<Nav>`. The active nav highlight depends on this manually-maintained string. Loading a URL directly shows correct state only because each page hardcodes the correct value in `useState`. This would silently break if state initialization is forgotten.
 
 **Fix approach:** Replace with `usePathname()` inside the Nav component, eliminating the prop entirely.
 
-**Files:** All `src/app/*/page.tsx` files, `fewog-app/src/components/nav.tsx`
+**Files:** All `fewog-app/src/app/*/page.tsx` files, `fewog-app/src/components/nav.tsx`
 
 ---
 
 ### 11. Nav links are `<a>` with no `href` — inaccessible to keyboard and crawlers
 
-`fewog-app/src/components/nav.tsx` lines 53–55 render `<a>` elements with `onClick` but no `href` attribute. Keyboard users navigating by Tab+Enter cannot activate these links. Screen readers announce them as non-interactive. Right-click "Open in new tab" does not work. Search engine crawlers cannot follow them.
+`fewog-app/src/components/nav.tsx` lines 53–55 render `<a>` elements with `onClick` but no `href`. Keyboard users navigating by Tab+Enter cannot activate these links. Screen readers announce them as non-interactive. Right-click "Open in new tab" does not work. Search engine crawlers cannot follow them.
 
-**Fix approach:** Replace with Next.js `<Link href="/wohnen">` etc., removing the `onClick` override entirely.
-
----
-
-### 12. `ServiceTile` `onClick` prop is silently ignored — "Schaden melden" tile does nothing
-
-`fewog-app/src/components/service-tile.tsx` line 29 renders `<div className="service-tile" onClick={onClick}>` — but the `onClick` prop is destructured from props and never attached. `fewog-app/src/app/page.tsx` line 94 passes an `onClick` that opens a mailto action. It fires nothing.
-
-**Files:** `fewog-app/src/components/service-tile.tsx:13,29`, `fewog-app/src/app/page.tsx:94`
+**Fix approach:** Replace with Next.js `<Link href="/wohnen">` etc.
 
 ---
 
-### 13. Duplicate CSS rule for `.detail-item dd` — wrong font size
+### 12. Duplicate CSS rule for `.detail-item dd` — overrides intended font size
 
-`fewog-app/src/app/globals.css` defines `.detail-item dd` at line 462 (`font-size: 18px; font-weight: 700`) and again at line 483 (`font-size: 15px`). The second silently overrides the first.
+`fewog-app/src/app/globals.css` defines `.detail-item dd` at line 464 (`font-size: 18px; font-weight: 700`) and again at line 485 (`font-size: 15px`). The second silently overrides the first.
 
 **Impact:** Property detail panel values render at 15px instead of 18px as intended.
 
-**Fix approach:** Remove the duplicate block at lines 483–488.
+**Fix approach:** Remove the duplicate block at lines 485–490.
 
 ---
 
-### 14. `bestand-row.selected` uses off-brand blue not in the design system
+### 13. `bestand-row.selected` uses off-brand blue not in the design system
 
-`fewog-app/src/app/globals.css` line 495: `.bestand-row.selected { background: rgba(56, 128, 224, 0.08); }`. This blue has no relationship to any FEWOG design system CSS variable.
+`fewog-app/src/app/globals.css` line 491: `.bestand-row.selected { background: rgba(56, 128, 224, 0.08); }`. This blue has no relationship to any FEWOG design system CSS variable.
 
 **Fix approach:** Replace with `var(--c-accent-tint)` or `var(--c-secondary-tint)`.
 
 ---
 
-### 15. `eslint-disable-line react-hooks/exhaustive-deps` used twice with missing documentation
+### 14. `eslint-disable-line react-hooks/exhaustive-deps` used without explanation
 
-`fewog-app/src/app/wohnen/page.tsx` lines 35 and 62 suppress the exhaustive-deps rule. The suppressions are intentional (the `x` `useMotionValue` is stable), but the suppression comments do not explain why `x` is intentionally excluded, creating maintenance risk.
+`fewog-app/src/app/wohnen/page.tsx` lines 35 and 62 suppress the exhaustive-deps rule. The suppressions are intentional (the `x` `useMotionValue` is stable across renders), but there is no comment explaining why `x` is intentionally excluded. Creates maintenance risk.
 
 ---
 
-### 16. `sanity-plugin-media` not installed — required by CLAUDE.md
+### 15. `sanity-plugin-media` not installed — required by CLAUDE.md
 
 CLAUDE.md specifies `sanity-plugin-media` as a required dependency for asset management in Studio. It is absent from `fewog-app/package.json`. Without it, staff will have no media browser in Sanity Studio.
 
 ---
 
-### 17. `Fraunces` and `Montserrat` fonts referenced in CSS but never loaded
+### 16. `Fraunces` and `Montserrat` fonts referenced in CSS but never loaded
 
-`fewog-app/src/app/globals.css` lines 21–22 reference `Fraunces` and `Montserrat` in CSS font stack variables. `fewog-app/src/app/layout.tsx` only loads `Geist` and `Geist_Mono` via `next/font/google`. Both design system display fonts silently fall back to system fonts; no request is ever made for them.
+`fewog-app/src/app/globals.css` lines 21–22 reference `Fraunces` and `Montserrat` in CSS font stack variables. `fewog-app/src/app/layout.tsx` only loads `Geist` and `Geist_Mono` via `next/font/google`. Both design system display fonts silently fall back to system fonts.
 
 **Files:** `fewog-app/src/app/globals.css:21-22`, `fewog-app/src/app/layout.tsx:5-12`
 
 ---
 
-### 18. "Jahre Fellbach" stat hardcodes year 2026
-
-`fewog-app/src/app/page.tsx` line 65: `{2026 - FEWOG_DATA.meta.founded}`. After 31 December 2026 this displays the wrong number without a code change.
-
-**Fix approach:** `new Date().getFullYear() - FEWOG_DATA.meta.founded`
-
----
-
-### 19. `'use client'` on every file — server components not used
+### 17. `'use client'` on every file — server components not used anywhere
 
 Every route file and every component declares `'use client'`. This includes purely static pages:
-- `datenschutz/page.tsx` — static legal text
-- `impressum/page.tsx` — static legal text
+- `datenschutz/page.tsx` — static legal text, no state or effects
+- `impressum/page.tsx` — static legal text, no state or effects
 - `footer.tsx` — no state or effects
 - `contact-strip.tsx` — no state or effects
 
-**Impact:** All pages forfeit server rendering benefits, SSG, and `generateMetadata` support. Once Sanity is added, `defineLive` + `<SanityLive />` requires the page to be a server component with only interactive islands as client components.
+**Impact:** All pages forfeit server rendering benefits, SSG, and `generateMetadata` support. Once Sanity is added, `defineLive` + `<SanityLive />` requires pages to be server components with only interactive islands as client components. Every file will need refactoring.
 
 ---
 
-## Architecture Gaps
+## Medium Priority (address in next milestone)
 
-### 20. No Sanity schema definitions for any content type
-
-CLAUDE.md specifies five required schemas: Liegenschaft, Neuigkeit, Teammitglied, Dokument, Seiteneinstellungen. None exist. There is no `schemas/` directory.
-
----
-
-### 21. No Sanity Studio route — client cannot access CMS
-
-There is no `/studio` route in the app. Per CLAUDE.md the studio should be embedded at `app/studio/[[...tool]]/page.tsx`.
-
----
-
-### 22. Design prototype features absent from fewog-app
-
-The `Design/views.jsx` prototype has features not yet built in the Next.js app:
-
-| Feature | Design prototype | fewog-app |
-|---------|-----------------|-----------|
-| District filter chips in Wohnen | Present | Missing |
-| Sort toggle (A-Z / Größe / Sanierung) | Present | Missing |
-| Street search input | Present | Missing |
-| Stadtteil overview tiles (Häuser / WE / Ø Baujahr) | Present | Missing |
-| "Story" editorial section on homepage | Present | Missing |
-| District feature cards on homepage | Present | Missing |
-| "Mitglied werden" CTA in hero and Nav | Present | Missing from both |
-| Interactive SVG district map with property pins | Present | Not implemented |
-| Property drawer with sanierungsstand detail text and actions | Present | Simplified — replaced by panel with less content |
-| Footer 4-column grid (Wohnen / Service / Kontakt links) | Present | Simplified single-row footer |
-
----
-
-### 23. No TypeGen setup — Sanity types will be `any` when CMS is added
-
-`fewog-app/package.json` has no `sanity typegen generate` script and no `sanity-typegen.json`. All Sanity query return types will be `any` unless TypeGen is configured alongside the CMS integration.
-
----
-
-## Mobile / UX Issues
-
-### 24. No keyboard support for property list row selection
+### 18. No keyboard support for property list row selection
 
 `fewog-app/src/app/wohnen/page.tsx` lines 128–141 use `onClick` on `<div>` elements with no `onKeyDown`, `role="button"`, or `tabIndex`. Keyboard-only users cannot select a property.
 
@@ -256,23 +202,23 @@ The `Design/views.jsx` prototype has features not yet built in the Next.js app:
 
 ---
 
-### 25. No skip-to-content link — WCAG 2.1 SC 2.4.1 violation
+### 19. No skip-to-content link — WCAG 2.1 SC 2.4.1 violation
 
-No skip navigation link exists anywhere in `fewog-app/src/app/layout.tsx`. Keyboard users must tab through the entire navigation on every page before reaching main content.
+No skip navigation link exists in `fewog-app/src/app/layout.tsx`. Keyboard users must tab through the entire navigation on every page before reaching main content.
 
 ---
 
-### 26. Mobile navigation menu cannot be dismissed by clicking outside or pressing Escape
+### 20. Mobile navigation cannot be dismissed by clicking outside or pressing Escape
 
 `fewog-app/src/components/nav.tsx` has no handler to close the mobile menu on outside click or Escape key press.
 
 ---
 
-### 27. No `next/image` — raw `<img>` tags throughout, LCP unoptimized
+### 21. No `next/image` — raw `<img>` tags throughout, LCP unoptimized
 
 All images use raw `<img>` tags:
 - `fewog-app/src/app/page.tsx` line 71 — hero image (LCP element, no `priority`)
-- `fewog-app/src/app/wohnen/page.tsx` line 160 — property detail photo
+- `fewog-app/src/app/wohnen/page.tsx` line 159 — property detail photo
 - `fewog-app/src/components/nav.tsx` line 39 — FEWOG logo
 
 No WebP/AVIF conversion, no lazy loading, no blur placeholder, no LCP priority hint.
@@ -281,12 +227,83 @@ No WebP/AVIF conversion, no lazy loading, no blur placeholder, no LCP priority h
 
 ---
 
-## Operational Readiness
+### 22. FEWOG logo loaded from old site's CDN
 
-### 28. No `.env.local`, no `.env.example` — environment variables undocumented
+`fewog-app/src/components/nav.tsx` line 40 loads `https://www.fewog.de/fileadmin/pics/logo_fewog.png`. If the old site goes offline the nav logo breaks. Also bypasses `next/image` optimization.
 
-No environment variable files exist. When Sanity is integrated the following will be required and have no documentation:
+**Fix approach:** Download and commit to `public/logo-fewog.png`, use `next/image` with `priority`.
 
+---
+
+### 23. PDF links point to old `fewog.de` fileadmin CDN
+
+All downloadable document links in `fewog-app/src/app/service/page.tsx` (lines 66, 85, 90, 115) and `fewog-app/src/app/ueberuns/page.tsx` (line 112) reference `https://www.fewog.de/fileadmin/PDF/...`. These break if the legacy site is decommissioned.
+
+**Fix approach:** Upload PDFs to Sanity media library as Dokument assets.
+
+---
+
+### 24. `ueberuns/page.tsx` contains stale member count
+
+`fewog-app/src/app/ueberuns/page.tsx` line 45 states "rund 1.200 Mitgliedern" but `fewog-app/src/lib/data.ts` line 30 and CLAUDE.md both state 1.480 Mitglieder. Content was copied from an older source and not updated.
+
+---
+
+### 25. `datenschutz/page.tsx` references a contact form that does not exist
+
+`fewog-app/src/app/datenschutz/page.tsx` lines 136–148 describe a "Mängelmeldeformular" and how form data is processed. No such form exists — the "Schaden melden" tile opens a `mailto:` link. The privacy policy describes a feature that is absent.
+
+---
+
+### 26. No TypeGen setup — Sanity types will be `any` when CMS is added
+
+`fewog-app/package.json` has no `sanity typegen generate` script and no `sanity-typegen.json`. All Sanity query return types will be `any` unless TypeGen is configured alongside the CMS integration.
+
+---
+
+### 27. "Jahre Fallbach" stat calculation is unnecessarily complex
+
+`fewog-app/src/app/page.tsx` line 64 calculates the founding year anniversary with three nested `new Date()` calls. The logic is correct but difficult to read. Equivalent simplified form: `new Date().getFullYear() - 1948 - (new Date() < new Date(new Date().getFullYear(), 8, 9) ? 1 : 0)`.
+
+---
+
+## Low Priority (nice to have)
+
+### 28. `next.config.ts` is empty — no image remotePatterns, no security headers
+
+`fewog-app/next.config.ts` contains only a blank `nextConfig` object. Missing:
+- `images.remotePatterns` for `cdn.sanity.io` and `www.fewog.de` (required for `next/image`)
+- Security headers (`X-Frame-Options`, `Content-Security-Policy`, `Referrer-Policy`)
+
+---
+
+### 29. No deployment configuration
+
+No `vercel.json` exists. Sanity Studio CORS origins for the Vercel deployment URL are not configured. The project has never been formally linked to a Vercel project (no `.vercel/` directory).
+
+---
+
+### 30. Public directory contains only default Next.js placeholder SVGs
+
+`fewog-app/public/` contains only `file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`. Missing: FEWOG favicon, `robots.txt`, `sitemap.xml`, `og-image.png`.
+
+---
+
+### 31. No `robots.txt` or `sitemap.xml`
+
+No `src/app/robots.ts` or `src/app/sitemap.ts` exists. The five site routes are not discoverable to search engines.
+
+---
+
+### 32. No OpenGraph or Twitter metadata — social sharing shows no preview
+
+`fewog-app/src/app/layout.tsx` exports only `title` and `description`. No `openGraph`, no `twitter` metadata.
+
+---
+
+### 33. No `.env.local` or `.env.example` — environment variables undocumented
+
+No environment variable files exist. When Sanity is integrated the following will be required with no documentation:
 ```
 NEXT_PUBLIC_SANITY_PROJECT_ID
 NEXT_PUBLIC_SANITY_DATASET
@@ -298,91 +315,40 @@ SANITY_WEBHOOK_SECRET
 
 ---
 
-### 29. `next.config.ts` is empty — no image remotePatterns, no headers
+### 34. No error monitoring configured
 
-`fewog-app/next.config.ts` contains only a blank `nextConfig` object. Missing:
-- `images.remotePatterns` for `cdn.sanity.io` and `www.fewog.de` (blocks `next/image`)
-- Security headers (`X-Frame-Options`, `Content-Security-Policy`)
-- No deployment configuration
+No Sentry or equivalent error tracking is configured. Runtime errors in production would be invisible. Acceptable pre-launch; address before go-live.
 
 ---
 
-### 30. No deployment configuration — no `vercel.json`, no `.vercelignore`
+### 35. Adobe Reader download advice in service page is outdated
 
-No `vercel.json` exists. Sanity Studio CORS origins for the Vercel deployment URL are not configured. The project has never been formally linked to a Vercel project (no `.vercel/` directory).
-
----
-
-### 31. Public directory contains only default Next.js placeholder SVGs
-
-`fewog-app/public/` contains only `file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`. Missing: FEWOG favicon, `robots.txt`, `sitemap.xml`, `og-image.png`.
+`fewog-app/src/app/service/page.tsx` lines 76–77 and 100 tell users they need Adobe Reader to open PDFs. All modern browsers open PDFs natively. This copy looks unprofessional.
 
 ---
 
-### 32. FEWOG logo loaded from old site's CDN
+## Design–Implementation Gap
 
-`fewog-app/src/components/nav.tsx` line 40 loads `https://www.fewog.de/fileadmin/pics/logo_fewog.png`. If the old site goes offline the nav logo breaks. Also bypasses `next/image` optimization.
+The `Design/views.jsx` prototype has features not yet built in the Next.js app:
 
-**Fix approach:** Download and commit to `public/logo-fewog.png`, use `next/image` with `priority`.
+| Feature | Design prototype | fewog-app |
+|---------|-----------------|-----------|
+| District filter chips on Wohnen page | Present | Missing |
+| Sort toggle (A-Z / Größe / Sanierung) | Present | Missing |
+| Street search input | Present | Missing |
+| Stadtteil overview tiles (Häuser / WE / Ø Baujahr stats) | Present | Missing |
+| "Story" editorial section on homepage | Present | Missing |
+| District feature cards on homepage | Present | Missing |
+| "Mitglied werden" CTA in hero and Nav | Present | Missing from both |
+| Interactive SVG district map with property pins | Present | Not implemented |
+| Property drawer with Sanierungsstand detail text and contact actions | Present | Simplified panel with less content |
+| Footer 4-column grid (Wohnen / Service / Kontakt links) | Present | Simplified single-row footer |
 
----
-
-### 33. PDF links in `/service` and `/ueberuns` point to old `fewog.de` fileadmin CDN
-
-All downloadable document links in `fewog-app/src/app/service/page.tsx` (lines 66, 85, 90, 115) and `fewog-app/src/app/ueberuns/page.tsx` (line 112) reference `https://www.fewog.de/fileadmin/PDF/...`. These break if the legacy site is decommissioned.
-
-**Fix approach:** Upload PDFs to Sanity media library as Dokument assets.
-
----
-
-### 34. No `robots.txt` or `sitemap.xml`
-
-No `src/app/robots.ts` or `src/app/sitemap.ts` exists. The five site routes are not discoverable to search engines.
-
----
-
-### 35. No OpenGraph or Twitter metadata — social sharing has no preview image
-
-`fewog-app/src/app/layout.tsx` exports only `title` and `description`. No `openGraph`, no `twitter` metadata. Social sharing cards will render no image.
+The Design prototype `Design/data.js` also contains accurate reference data (612 units, 1.480 members, 27 properties across 3 districts) while `fewog-app/src/lib/data.ts` has inflated/incorrect figures (676 units, 1.200 members, 50 properties all in Kern).
 
 ---
 
-### 36. `ueberuns/page.tsx` contains stale member count
-
-`fewog-app/src/app/ueberuns/page.tsx` line 45 states "rund 1.200 Mitgliedern" but `fewog-app/src/lib/data.ts` line 30 and CLAUDE.md both state 1.480 Mitglieder. Content copied from an older source and not updated.
-
----
-
-### 37. `datenschutz/page.tsx` references a contact form that does not exist
-
-`fewog-app/src/app/datenschutz/page.tsx` lines 136–148 describe a "Mängelmeldeformular" and how form data is processed. No such form exists in the application — the "Schaden melden" tile opens a mailto link. The privacy policy describes a feature that is absent.
-
----
-
-### 38. No error monitoring configured
-
-No Sentry or equivalent error tracking is configured. Runtime errors in production would be invisible to the development team. Acceptable pre-launch; must be addressed before go-live.
-
----
-
-### 39. Adobe Reader download advice in service page is outdated
-
-`fewog-app/src/app/service/page.tsx` lines 76–77 and 100 tell users they need Adobe Reader to open PDFs and link to `http://get.adobe.com/de/reader/`. All modern browsers open PDFs natively. This copy looks unprofessional.
-
----
-
-## TODOs Found in Code
-
-No explicit `TODO`, `FIXME`, or `HACK` comments were found in `fewog-app/src/`. The following comments represent implicit placeholder intent:
-
-- `fewog-app/src/app/page.tsx:19`: `// Handle other pages later` — service, ueberuns, aktuelles navigation from homepage is silently disabled
-- `fewog-app/src/components/nav.tsx:29-31`: `// For other pages that don't exist yet, stay on current page` — known routing stub
-- `fewog-app/next.config.ts:4`: `/* config options here */` — intentional empty placeholder
-- `fewog-app/src/lib/data.ts:52`: `// SVG-Pfad (stilisierter Stadtteil — nicht geografisch exakt)` — known data quality limitation
-
----
-
-## Planned Stack vs. Reality
+## Missing Infrastructure
 
 | Planned Component | Status |
 |-------------------|--------|
@@ -392,14 +358,33 @@ No explicit `TODO`, `FIXME`, or `HACK` comments were found in `fewog-app/src/`. 
 | Schemas: Liegenschaft, Neuigkeit, Teammitglied, Dokument, Seiteneinstellungen | None exist |
 | `<SanityLive />` in `layout.tsx` | Not added |
 | `sanity-plugin-media` plugin | Not installed |
-| `@sanity/locale-de-de` locale applied in Studio config | Package installed but unused |
+| `@sanity/locale-de-de` applied in Studio config | Package installed, unused |
 | Sanity TypeGen (`sanity.types.ts`) | Not generated |
 | `next.config.ts` with `cdn.sanity.io` remote pattern | Not configured |
-| `next/image` replacing `<img>` tags | Not done |
+| `next/image` replacing raw `<img>` tags | Not done |
 | Skip-to-content link (WCAG 2.1 SC 2.4.1) | Not created |
-| `sitemap.ts` | Not created |
+| `app/robots.ts` + `app/sitemap.ts` | Not created |
 | FEWOG-branded metadata in `layout.tsx` | Not done |
 | `lang="de"` in HTML root | Not done |
+| `app/error.tsx`, `app/not-found.tsx`, `app/loading.tsx` | Not created |
+| `.env.example` documenting required vars | Not created |
+
+---
+
+## Notes
+
+**Dependency between issues:** Issues 1 (no CMS) and 17 (`'use client'` everywhere) are tightly coupled. Converting static pages to server components is a prerequisite for using `defineLive` correctly. The entire data layer (`src/lib/data.ts`) must be replaced simultaneously with schema creation, client setup, and page refactoring.
+
+**Implicit placeholder comments (no formal TODO markers):**
+- `fewog-app/src/app/page.tsx:19` — `// Handle other pages later`
+- `fewog-app/src/components/nav.tsx:29-31` — `// For other pages that don't exist yet`
+- `fewog-app/next.config.ts:4` — `/* config options here */`
+- `fewog-app/src/lib/data.ts:52` — `// SVG-Pfad (stilisierter Stadtteil — nicht geografisch exakt)`
+
+**Data inconsistencies (hardcoded content conflicts):**
+- `FEWOG_DATA.meta.founded` = 1948 vs. CLAUDE.md and `ueberuns/page.tsx` text = 1948 (consistent) vs. the design prototype `Design/data.js` says 1949
+- `FEWOG_DATA.meta.members` = 1200 vs. CLAUDE.md = 1.480 vs. `ueberuns/page.tsx` text = "rund 1.200"
+- `FEWOG_DATA.meta.properties` = 50 (incorrect) vs. CLAUDE.md = 27
 
 ---
 

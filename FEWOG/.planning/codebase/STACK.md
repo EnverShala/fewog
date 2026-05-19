@@ -28,7 +28,7 @@
   - Typography scale: Fraunces (display serif), Montserrat/Inter (headings), Inter/Lato (body) — referenced in CSS vars
   - `@theme inline` block bridges CSS vars into Tailwind theme
   - Tailwind utility classes used in layout and pages alongside custom classes (`.btn`, `.hero`, `.wrap`, `.nav`, `.footer`)
-- **Fonts:** Geist Sans and Geist Mono loaded via `next/font/google` in `fewog-app/src/app/layout.tsx`; Fraunces and Montserrat referenced in CSS vars but **not loaded via `next/font`** (FOUC risk)
+- **Fonts:** Geist Sans and Geist Mono loaded via `next/font/google` in `fewog-app/src/app/layout.tsx`; Fraunces and Montserrat referenced in CSS vars but **not loaded via `next/font`** (potential FOUC)
 
 ## Build & Tooling
 
@@ -78,7 +78,7 @@ fewog-app/src/
 │   ├── aktuelles/        # News/Aktuelles page
 │   ├── datenschutz/      # DSGVO Datenschutzerklärung page
 │   ├── impressum/        # Legal Impressum page
-│   ├── service/          # Service page
+│   ├── service/          # Service page (+ mietermagazin-archiv, geschaeftsbericht-archiv subroutes)
 │   ├── ueberuns/         # About/Über Uns page
 │   └── wohnen/           # Property listing page (with detail slide-out panel)
 ├── components/           # Shared UI components
@@ -88,7 +88,7 @@ fewog-app/src/
 │   ├── service-tile.tsx
 │   └── icons.tsx
 ├── lib/
-│   └── data.ts           # Static FEWOG_DATA (50 properties, 3 districts, meta)
+│   └── data.ts           # Static FEWOG_DATA (50 properties, 3 districts, org meta)
 └── types/                # Present but empty
 ```
 

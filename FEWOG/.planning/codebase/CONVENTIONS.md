@@ -2,144 +2,11 @@
 
 **Analysis Date:** 2026-05-19
 
-## File & Directory Naming
+## TypeScript Usage
 
-**Pages:**
-- Route pages use lowercase route-slug directory names matching German site navigation: `src/app/aktuelles/page.tsx`, `src/app/ueberuns/page.tsx`, `src/app/service/page.tsx`, `src/app/wohnen/page.tsx`
-- Each route segment is a directory with a single `page.tsx` file (Next.js App Router convention)
+**Strict mode:** `"strict": true` in `fewog-app/tsconfig.json`. Enables `strictNullChecks`, `noImplicitAny`, and all other strict checks. Target is `ES2017`, `moduleResolution` is `bundler`, `isolatedModules` is `true`.
 
-**Components:**
-- All component files use lowercase kebab-case: `src/components/nav.tsx`, `src/components/footer.tsx`, `src/components/service-tile.tsx`, `src/components/contact-strip.tsx`, `src/components/icons.tsx`
-- No barrel `index.ts` files — components are imported directly by filename
-
-**Data / Library files:**
-- Utility and data files live in `src/lib/` using lowercase kebab-case: `src/lib/data.ts`
-
-## Component Patterns
-
-**Function declarations** are used for all components (both page defaults and named exports):
-
-```tsx
-// fewog-app/src/app/wohnen/page.tsx
-export default function WohnenPage() { ... }
-
-// fewog-app/src/components/nav.tsx
-export function Nav({ page, setPage }: NavProps) { ... }
-
-// fewog-app/src/components/service-tile.tsx
-export function ServiceTile({ icon, title, desc, href, onClick }: ServiceTileProps) { ... }
-```
-
-The one exception is `src/components/icons.tsx`, which uses arrow functions as object property values on the `Icon` namespace object — this is intentional for the namespace pattern, not a convention for components:
-
-```tsx
-export const Icon = {
-  arrow: () => (<svg .../>),
-  phone: () => (<svg .../>),
-};
-// Usage: <Icon.phone />
-```
-
-**Props typing:** A named `interface` declared immediately above the component. Props are destructured inline in the function signature, never accessed via `props.x`. Optional props use `?:` syntax:
-
-```tsx
-// fewog-app/src/components/service-tile.tsx
-interface ServiceTileProps {
-  icon: ReactNode;
-  title: string;
-  desc: string;
-  href?: string;
-  onClick?: () => void;
-}
-export function ServiceTile({ icon, title, desc, href, onClick }: ServiceTileProps) { ... }
-```
-
-**Default vs named exports:**
-- Page files (`page.tsx`) use `export default function`
-- All shared components use named exports (`export function`)
-- Data constants and model interfaces use named exports: `export const FEWOG_DATA`, `export interface Property`
-
-**`'use client'` directive:** Every page and every component file begins with `'use client'`. The entire prototype is client-side rendered. `src/app/layout.tsx` is the only file without the directive (it is a Server Component by default, per Next.js 15 App Router rules).
-
-**Conditional class names** use string concatenation — no `clsx` or `cn` utility is present:
-
-```tsx
-className={"nav " + (open ? "nav-mobile-open" : "")}
-className={"bestand-row" + (selectedProperty?.id === prop.id ? " selected" : "")}
-```
-
-**Inline `style` props** appear alongside CSS class names for one-off values that do not warrant a dedicated class. This is used in `src/components/footer.tsx`, `src/app/page.tsx`, and `src/app/service/page.tsx`. Inline styles should be minimized; prefer CSS custom properties referenced via class names.
-
-## Import Conventions
-
-**Path aliases:**
-- `@/` maps to `./src/` (defined in `fewog-app/tsconfig.json`)
-- Pages import components and data using the alias: `import { Nav } from '@/components/nav'`
-- Components import siblings using relative paths: `import { Icon } from './icons'`
-- Rule: use `@/` for cross-directory imports; use `./` for same-directory imports
-
-**Import ordering pattern (observed — not tooling-enforced):**
-1. React built-in hooks: `import { useState, useMemo, useRef } from 'react'`
-2. Next.js modules: `import { useRouter } from 'next/navigation'`
-3. Internal components via `@/` alias
-4. Internal lib/data via `@/` alias
-5. Type-only imports last, using `import type`: `import type { Property } from '@/lib/data'`
-
-**Quote style:** Single quotes for all imports in component and page files. `src/app/layout.tsx` uses double quotes (Next.js scaffold default) — single quotes are the project standard.
-
-## CSS / Styling Approach
-
-**Hybrid approach: CSS custom property design tokens + Tailwind v4 utilities + semantic class names.**
-
-**Tailwind v4** is imported via `@import "tailwindcss"` at the top of `src/app/globals.css`. Tailwind utilities are used only for structural layout on top-level wrappers: `min-h-screen`, `min-h-full`, `flex`, `flex-col`, `antialiased`.
-
-**Semantic CSS classes** defined in `src/app/globals.css` are used for all design-system components. These follow a flat BEM-adjacent naming pattern:
-
-```
-.wrap               — max-width content container
-.nav, .nav-inner, .nav-links, .nav-link, .nav-burger, .nav-mobile-open
-.hero, .hero-grid, .hero-title, .hero-lead, .hero-ctas, .hero-stats, .hero-image
-.service-dock, .service-grid, .service-tile
-.bestand, .bestand-list, .bestand-row, .bestand-detail-col, .bestand-letter
-.footer, .footer-bottom
-.contact-strip, .contact-cell
-.content-section, .content-block
-.page-head, .page-head-simple
-.btn, .btn-primary, .btn-ghost, .btn-arrow
-.eyebrow, .serif, .mono, .muted
-```
-
-**Design tokens** are CSS custom properties defined in `:root` in `src/app/globals.css`:
-
-```css
-/* Colors */
---c-primary:   #8B1D28;   /* Kappelberg-Rot */
---c-secondary: #4A5D4E;   /* Weinlaub-Grün */
---c-bg:        #FDF8F7;   /* Rosé-Weiß */
---c-ink:       #2D2D2D;   /* Schiefergrau */
---c-ink-soft:  #6B6663;
---c-line:      #E2DAD4;
---c-card:      #FFFFFF;
-
-/* Typography */
---f-display: "Fraunces", Georgia, serif;
---f-head: "Montserrat", system-ui, sans-serif;
---f-body: "Inter", system-ui, sans-serif;
-
-/* Spacing scale */
---s-1: 4px  through  --s-9: 96px;
-
-/* Layout */
---radius: 6px; --radius-lg: 14px; --maxw: 1280px;
-```
-
-Rule: always reference CSS custom properties for brand colors (`var(--c-primary)`). Never hardcode hex values inside component files — only in `globals.css`.
-
-## TypeScript Conventions
-
-**Strict mode:** `"strict": true` in `fewog-app/tsconfig.json`. Enables `strictNullChecks`, `noImplicitAny`, etc.
-
-**Interface for object shapes:** Use `interface` for all object and prop definitions, not `type` aliases:
+**Interfaces for object shapes.** Use `interface` for props and domain models — not `type` aliases:
 
 ```ts
 // fewog-app/src/lib/data.ts
@@ -152,82 +19,248 @@ export interface Property {
   rooms: string;
   sanierung: number;
   imageUrl: string;
-  pos?: [number, number];
+  pos?: [number, number];       // optional tuple
 }
 ```
 
 **`import type`** for type-only imports (required by `"isolatedModules": true`):
-
 ```ts
 import type { Property } from '@/lib/data';
 ```
 
-**Generic state and refs** typed explicitly when type is not inferred:
-
+**Generic state typed explicitly** when not inferred:
 ```ts
 const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-const detailRef = useRef<HTMLDivElement>(null);
+const panelRef = useRef<HTMLDivElement>(null);
+const entryAnim = useRef<ReturnType<typeof animate> | null>(null);
+```
+
+**Tuple casting** used for animation easing constants:
+```ts
+const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 ```
 
 **Optional chaining** used consistently for nullable access: `selectedProperty?.id`, `districtById[id]?.name`.
 
-## Naming Patterns
+**No `any` usage detected** in source files.
+
+## Component Patterns
+
+**All components are function components.** No class components exist anywhere.
+
+**`'use client'` directive:** Every page and shared component carries `'use client'` at the top. The entire app is client-side rendered in the prototype. `src/app/layout.tsx` is the only file without it (Server Component by default in Next.js 15 App Router).
+
+**Named exports for components, default exports for pages:**
+```tsx
+// Shared component — named export
+export function ServiceTile({ icon, title, desc, href, onClick }: ServiceTileProps) { ... }
+
+// Page file — default export
+export default function WohnenPage() { ... }
+```
+
+**Props typing:** A named `interface` declared immediately above the component. Props destructured inline in the signature, never accessed via `props.x`:
+```tsx
+interface ServiceTileProps {
+  icon: ReactNode;
+  title: string;
+  desc: string;
+  href?: string;
+  onClick?: () => void;
+}
+export function ServiceTile({ icon, title, desc, href, onClick }: ServiceTileProps) { ... }
+```
+
+**Conditional class names** use string concatenation — no `clsx` or `cn` utility:
+```tsx
+className={'bestand-row' + (selectedProperty?.id === prop.id ? ' selected' : '')}
+className={'nav-link' + (page === k ? ' active' : '')}
+```
+
+**Icon namespace pattern** in `fewog-app/src/components/icons.tsx` — inline SVGs collected under a single `Icon` object, each as an arrow function:
+```tsx
+export const Icon = {
+  wrench: () => <svg ...>...</svg>,
+  close:  () => <svg ...>...</svg>,
+};
+// Usage: <Icon.wrench />
+```
+
+**Navigation state pattern:** Every page component owns a `const [page, setPage] = useState('pagename')` and passes it to `<Nav>` for active-link highlighting. `Nav` receives `page` + `setPage` but routes via `useRouter()` internally:
+```tsx
+// wohnen/page.tsx
+const [page, setPage] = useState('wohnen');
+return <Nav page={page} setPage={setPage} />;
+```
+
+**Animation pattern** in `fewog-app/src/app/wohnen/page.tsx` — **imperative, not declarative**:
+- `useMotionValue(0)` for real-time drag offset — never React state
+- `animate(motionValue, target, options)` for programmatic transitions
+- `<motion.div style={{ x }}>` — binds motion value; no `animate` prop on the element
+- `useLayoutEffect` for entry slide-in immediately after mount (avoids frame flash)
+- Non-passive `touchmove` listener registered via `useEffect` for swipe-to-close
+
+## CSS / Styling Approach
+
+**Hybrid: global design-system CSS classes + CSS custom properties + minimal Tailwind utilities.**
+
+**Global CSS classes** in `fewog-app/src/app/globals.css` provide all component-level styling:
+```
+Layout:      .wrap, .hero, .hero-grid, .bestand-layout, .bestand-list-col, .bestand-detail-col
+Nav:         .nav, .nav-inner, .nav-links, .nav-link, .nav-cta, .nav-burger, .nav-mobile-dropdown
+Typography:  .eyebrow, .serif, .mono, .muted
+Buttons:     .btn, .btn-primary, .btn-ghost, .btn-arrow, .btn-download
+Service:     .service-dock, .service-grid, .service-tile
+Contact:     .contact-strip, .contact-cell, .lbl, .val
+Bestand:     .bestand, .bestand-list, .bestand-row, .bestand-letter, .property-detail-panel
+Detail:      .detail-hero, .detail-hero-overlay, .detail-body, .detail-grid, .detail-item, .detail-close
+Pages:       .page-head, .page-head-simple, .content-section, .content-block
+Archive:     .archiv-list, .archiv-row, .archiv-year, .archiv-title
+Utility:     .info-box, .info-grid, .contact-info
+Footer:      .footer, .footer-grid, .footer-bottom
+```
+
+**Design tokens** as CSS custom properties in `:root`:
+```css
+/* Brand colors */
+--c-primary:        #8B1D28;   /* Kappelberg-Rot */
+--c-secondary:      #4A5D4E;   /* Weinlaub-Grün */
+--c-bg:             #FDF8F7;   /* Rosé-Weiß */
+--c-bg-2:           #F5EFEC;
+--c-bg-3:           #ECE6E2;
+--c-ink:            #2D2D2D;   /* Schiefergrau */
+--c-ink-soft:       #6B6663;
+--c-ink-mute:       #9A9590;
+--c-line:           #E2DAD4;
+--c-line-soft:      #EDE6E1;
+--c-card:           #FFFFFF;
+--c-accent-tint:    #F4E4E5;
+--c-secondary-tint: #E8EAE5;
+
+/* Typography */
+--f-display: "Fraunces", Georgia, serif;
+--f-head:    "Montserrat", system-ui, sans-serif;
+--f-body:    "Inter", system-ui, sans-serif;
+--f-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+/* Spacing scale (4px base) */
+--s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+--s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px;
+
+/* Shape */
+--radius: 6px; --radius-lg: 14px; --maxw: 1280px;
+```
+
+**Rule: Always use CSS custom properties for brand values. Never hardcode hex colors or spacing numbers inside component `.tsx` files.** Hardcoded values belong only in `globals.css`.
+
+**Tailwind 4** is used only for coarse structural utilities on outermost wrappers: `min-h-screen`, `flex`, `flex-col`, `min-h-full`, `h-full`, `antialiased`. Not used for component-level colors, typography, or spacing.
+
+**Inline `style` prop** used sparingly for one-off numeric values that don't warrant a class (e.g., `style={{ marginTop: 32 }}`, `style={{ scrollMarginTop: 80 }}`). Minimize use.
+
+**Responsive breakpoints** in `globals.css`:
+- Tablet: `@media (max-width: 960px)`
+- Mobile: `@media (max-width: 768px)`
+- Small mobile: `@media (max-width: 600px)`
+
+Link hover interactions use `transition: color .15s` with `var(--c-secondary)` as hover color — established pattern for `.contact-strip a:hover` and `.content-block a:hover`.
+
+## Import Organization
+
+**Path aliases:** `@/` maps to `./src/` (defined in `fewog-app/tsconfig.json`).
+- Cross-directory imports use `@/`: `import { Nav } from '@/components/nav'`
+- Same-directory imports use `./`: `import { Icon } from './icons'`
+
+**Import order pattern (observed, not enforced):**
+1. React hooks: `import { useState, useEffect, useMemo, useRef } from 'react'`
+2. Third-party libraries: `import { motion, animate } from 'framer-motion'`
+3. Next.js: `import { useRouter } from 'next/navigation'`
+4. Internal components via `@/`
+5. Internal lib/data via `@/`
+6. Type-only imports last with `import type`
+
+**Quote style:** Single quotes for imports in component and page files. `layout.tsx` uses double quotes (Next.js scaffold default, inconsistency to fix).
+
+## File Organization
+
+```
+fewog-app/src/
+├── app/
+│   ├── globals.css              # Entire design system — tokens, classes, responsive
+│   ├── layout.tsx               # Root layout: font loading, html/body setup
+│   ├── page.tsx                 # Homepage — 'use client', hero + service dock
+│   ├── wohnen/page.tsx          # Property A-Z list with detail panel
+│   ├── ueberuns/page.tsx        # About page — content-block sections
+│   ├── aktuelles/page.tsx       # News/updates page
+│   ├── impressum/page.tsx       # Legal notice
+│   ├── datenschutz/page.tsx     # Privacy policy
+│   └── service/
+│       ├── page.tsx             # Services overview
+│       ├── mietermagazin-archiv/page.tsx
+│       └── geschaeftsbericht-archiv/page.tsx
+├── components/                  # Shared UI — all 'use client'
+│   ├── contact-strip.tsx
+│   ├── footer.tsx
+│   ├── icons.tsx                # Icon namespace object
+│   ├── nav.tsx                  # Navigation with mobile dropdown
+│   └── service-tile.tsx
+└── lib/
+    └── data.ts                  # FEWOG_DATA static dataset + TypeScript interfaces
+```
+
+**No barrel exports.** Components imported directly by file path.
+
+**Page-scoped static data** (archive lists) defined as module-level `const ARCHIV = [...]` at the top of the page file that uses it — not in `lib/`.
+
+**Where to add new code:**
+- New page: `src/app/<slug>/page.tsx` with `'use client'` and the nav state pattern
+- New shared component: `src/components/<kebab-name>.tsx`
+- New data types or static data: `src/lib/data.ts`
+- New global styles: append to `src/app/globals.css` with a section comment
+
+## Naming
 
 | Category | Convention | Examples |
 |----------|-----------|---------|
-| React components | PascalCase | `Nav`, `Footer`, `ServiceTile`, `WohnenPage` |
-| Page components | PascalCase + `Page` suffix (except home) | `WohnenPage`, `UeberUnsPage`, `AktuellesPage`, `ServicePage`, `Home` |
+| React components (shared) | PascalCase | `Nav`, `Footer`, `ServiceTile`, `ContactStrip` |
+| Page default exports | PascalCase + `Page` suffix | `WohnenPage`, `UeberUnsPage`, `ServicePage` (homepage exception: `Home`) |
 | Prop interfaces | PascalCase + `Props` suffix | `NavProps`, `ServiceTileProps` |
-| Data model interfaces | PascalCase | `Property`, `District`, `FewogData` |
-| Module-level constants | SCREAMING_SNAKE_CASE | `FEWOG_DATA` |
-| Local variables and state | camelCase | `selectedProperty`, `districtById`, `grouped`, `filtered` |
-| Event handlers | `handle` prefix | `handleTouchStart`, `handleTouchMove`, `handleTouchEnd` |
-| Short internal helpers | Short camelCase | `go`, `closeDetail` |
-| CSS class names | lowercase kebab-case | `.bestand-row`, `.nav-link`, `.hero-lead` |
-| CSS modifier classes | space-separated suffix | `"bestand-row selected"`, `"nav nav-mobile-open"` |
+| Domain model interfaces | PascalCase | `Property`, `District`, `FewogData` |
+| Module-level constants | SCREAMING_SNAKE_CASE | `FEWOG_DATA`, `NAV_LINKS`, `ARCHIV`, `EASE`, `DUR` |
+| Local variables / state | camelCase | `selectedProperty`, `districtById`, `grouped`, `filtered` |
 | File names | lowercase kebab-case | `service-tile.tsx`, `contact-strip.tsx` |
+| CSS classes | lowercase kebab-case | `.bestand-row`, `.nav-link`, `.hero-lead` |
+| Route segments | lowercase German slugs | `/wohnen`, `/ueberuns`, `/aktuelles` |
 
 ## Comments
 
-File-level comments identify the module purpose:
-
+File-level header comments identify the module:
 ```ts
 // FEWOG Fellbach — Icons
 // Tiny icons (line, monoline, no slop)
-
-// FEWOG Fellbach — Bestandsdaten (Aktuell, 50 Liegenschaften)
-// Alle Adressen von https://www.fewog.de/verwaltung/wohnungsbestand.html
 ```
 
-JSX section dividers mark major layout blocks within page components:
-
+JSX section dividers mark major layout blocks:
 ```tsx
 {/* Hero Section */}
 {/* Service Dock */}
-{/* Detail Panel — slides in from right */}
-{/* Page Header */}
+{/* Detail Panel */}
 ```
 
-No JSDoc annotations are used anywhere in the current codebase.
+No JSDoc annotations are used.
 
-## Framer Motion Usage
+## Linting
 
-Framer Motion is used exclusively in `src/app/wohnen/page.tsx` for the mobile detail panel. The pattern is **imperative, not declarative**:
+ESLint 9 with flat config at `fewog-app/eslint.config.mjs`. Uses `FlatCompat` to bridge legacy `next/core-web-vitals` and `next/typescript` presets. No custom rules added. Run with `npm run lint` (calls `eslint` with no arguments, so it uses the config's defaults).
 
-- `useMotionValue(0)` tracks the panel's horizontal drag offset — not React state
-- `animate(motionValue, target, options)` imperatively drives animations (slide-in on mount, spring-back or dismiss on swipe release)
-- `<motion.div style={{ x: panelX }}>` binds the motion value to the DOM — no `animate` prop on the element
-- Touch event handlers (`onTouchStart`, `onTouchMove`, `onTouchEnd`) update `panelX.set(delta)` directly for real-time feedback
-- `useLayoutEffect` triggers the entry animation immediately after mount (avoids a frame flash)
-- Direction lock: first-move gesture determines axis; once horizontal, vertical scroll is suppressed for that touch
+No Prettier config file detected — code formatting is not enforced by tooling.
 
-**Do not** use Framer Motion declarative `animate={{ x: ... }}` props or `whileDrag` on new additions — the established pattern is imperative `useMotionValue` + `animate()` calls.
+## Notes
 
-## Linting Configuration
-
-ESLint 9 with flat config format at `fewog-app/eslint.config.mjs`. Uses `@eslint/eslintrc` `FlatCompat` to bridge legacy `next/core-web-vitals` and `next/typescript` rulesets into the flat config system. No custom rules are added beyond the Next.js defaults.
-
-No Prettier config file is present — code formatting is not enforced by tooling.
+- **Mixed navigation approaches:** Both `router.push()` and `window.location.href` assignments appear in `nav.tsx` and `page.tsx`. Standardize on `router.push()`.
+- **No Sanity wired yet:** `next-sanity`, `sanity`, `@portabletext/react`, and `@sanity/image-url` are installed but no client/schema/studio exists in `src/`. All content is static data.
+- **Placeholder metadata:** `layout.tsx` still has `title: "Create Next App"` — update before production.
+- **Unsplash placeholder image** in homepage hero — will be replaced by Sanity CDN asset.
+- **`framer-motion` v12** installed. Used only in `nav.tsx` (mobile dropdown) and `wohnen/page.tsx` (detail panel). Do not use declarative `animate` props — imperative `useMotionValue` + `animate()` is the established pattern.
 
 ---
 

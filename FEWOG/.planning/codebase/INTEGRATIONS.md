@@ -69,16 +69,19 @@
 
 **fewog.de legacy site:**
 - Property images hotlinked from `www.fewog.de/fileadmin/_processed_/...` (`fewog-app/src/lib/data.ts`)
-- PDF documents linked from `www.fewog.de/fileadmin/PDF/...` in service and about pages
+- PDF documents linked from `www.fewog.de/fileadmin/PDF/...` in `fewog-app/src/app/service/page.tsx`
 
 **Unsplash:**
-- One hero image hotlinked (`images.unsplash.com`) in `fewog-app/src/app/page.tsx` — no API key
+- One hero image hotlinked (`images.unsplash.com`) in `fewog-app/src/app/page.tsx` — no API key, no attribution
 
 **Brunata / METRONA tenant portal:**
 - External link to `nutzerportal.brunata-muenchen.de` in `fewog-app/src/app/aktuelles/page.tsx` — no API integration
 
 **ImmobilienScout24:**
 - External link to `immoscout.de` in `fewog-app/src/app/aktuelles/page.tsx` — no API integration
+
+**Adobe Reader:**
+- External link to `get.adobe.com/de/reader/` in `fewog-app/src/app/service/page.tsx` — for PDF viewing instructions
 
 ## Integration Gaps (planned but not yet implemented)
 
@@ -88,9 +91,9 @@ Based on CLAUDE.md and installed-but-unconfigured packages:
 2. **Embedded Studio route** — `fewog-app/src/app/studio/[[...tool]]/page.tsx`
 3. **Sanity content fetching** — Replace `src/lib/data.ts` and static pages with `defineLive` queries + `<SanityLive />`
 4. **Sanity image migration** — Replace hotlinked images with Sanity CDN via `next-sanity/image` loader
-5. **`sanity-plugin-media`** — Media browser plugin not yet installed
-6. **Sanity CORS configuration** — Must add `https://fewog.de` and `http://localhost:3000` to Sanity project CORS settings
-7. **Damage report form (Mängelmelder)** — Referenced in homepage service tile; no form implementation exists
+5. **`sanity-plugin-media`** — Media browser plugin not yet installed (`npm install sanity-plugin-media`)
+6. **Sanity CORS configuration** — Must add `https://fewog.de` and `http://localhost:3000` to Sanity project CORS settings once project is created
+7. **Damage report form (Mängelmelder)** — Referenced in homepage service tile (`fewog-app/src/app/page.tsx`); currently a `mailto:` link, no form implementation
 8. **Vercel connection** — Production deployment not yet configured
 
 ---

@@ -3,278 +3,205 @@
 
 **Analysis Date:** 2026-05-19
 
-## Application Type
-
-Static-first corporate website for FEWOG (Fellbacher Wohnungsbau-Genossenschaft eG). Built with Next.js 15 App Router. The current implementation is a **prototype/MVP with hardcoded data** — Sanity CMS packages are installed (`sanity`, `next-sanity`, `@sanity/image-url`, `@portabletext/react`) but not yet wired up. All content is served from a static TypeScript module (`src/lib/data.ts`).
-
 ## System Overview
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│                    Browser (Client)                          │
-│  All page components use 'use client' — CSR only            │
-└────────────────────────┬────────────────────────────────────┘
-                         │ Next.js App Router
-┌────────────────────────▼────────────────────────────────────┐
-│                   Page Components                            │
-│  /           → src/app/page.tsx         (Home)              │
-│  /wohnen     → src/app/wohnen/page.tsx  (Property A–Z list) │
-│  /service    → src/app/service/page.tsx (Services)          │
-│  /ueberuns   → src/app/ueberuns/page.tsx (About)            │
-│  /aktuelles  → src/app/aktuelles/page.tsx (News)            │
-└────────────┬──────────────────────────────┬─────────────────┘
-             │                              │
-             ▼                              ▼
-┌────────────────────────┐  ┌──────────────────────────────────┐
-│   Shared Components    │  │   Static Data Layer              │
-│  src/components/       │  │  src/lib/data.ts                 │
-│  - nav.tsx             │  │  - FEWOG_DATA typed constant     │
-│  - footer.tsx          │  │  - Property[], District[], meta  │
-│  - contact-strip.tsx   │  └──────────────────────────────────┘
-│  - service-tile.tsx    │
-│  - icons.tsx           │
-└────────────────────────┘
+│                    Browser (User)                            │
+│              React 19 + Framer Motion + CSS                  │
+└──────────────────────────┬──────────────────────────────────┘
+                           │ HTTP
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Next.js 15 App Router (Vercel)                  │
+│         `fewog-app/src/app/`  — all pages 'use client'       │
+│  layout.tsx → page.tsx (per route) → shared components       │
+└──────────┬───────────────────────────────────────────────────┘
+           │ Static data import (no CMS yet)
+           ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Local Data Layer                                   │
+│           `fewog-app/src/lib/data.ts`                        │
+│           Hardcoded TypeScript objects (FEWOG_DATA)          │
+└─────────────────────────────────────────────────────────────┘
+
+Future (planned, packages installed but not wired up):
+┌─────────────────────────────────────────────────────────────┐
+│           Sanity Studio (not yet integrated)                 │
+│           sanity, next-sanity, @sanity/image-url installed   │
+│           No schemas, no sanity.config.ts, no /studio route  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Responsibilities
 
 | Component | Responsibility | File |
 |-----------|----------------|------|
-| `RootLayout` | HTML shell, Google Fonts (Geist), global CSS import | `src/app/layout.tsx` |
-| `Home` | Landing page: hero, service dock, contact strip | `src/app/page.tsx` |
-| `WohnenPage` | A–Z property list with slide-in detail panel, touch swipe-to-close | `src/app/wohnen/page.tsx` |
-| `ServicePage` | Mietertreff, Mietermagazin, Geschäftsbericht, Ferienwohnungen, Veranstaltungsraum | `src/app/service/page.tsx` |
-| `UeberUnsPage` | History, governance (Vorstand, Aufsichtsrat), Satzung PDF download | `src/app/ueberuns/page.tsx` |
-| `AktuellesPage` | Static announcements: Mängelmeldung, METRONA portal, Mietertreff | `src/app/aktuelles/page.tsx` |
-| `Nav` | Sticky nav bar with active-link highlighting and mobile hamburger menu | `src/components/nav.tsx` |
-| `Footer` | Brand mark, copyright line, Impressum/Datenschutz/AGB links (placeholder hrefs) | `src/components/footer.tsx` |
-| `ContactStrip` | Three-column office hours / phone / address block | `src/components/contact-strip.tsx` |
-| `ServiceTile` | Icon + title + description card; renders as `<a>` or `<div>` based on `href` prop | `src/components/service-tile.tsx` |
-| `Icon` | Named inline SVG icon map accessed as `Icon.wrench`, `Icon.phone`, etc. | `src/components/icons.tsx` |
-| `FEWOG_DATA` | Typed constant: meta stats, 3 districts with SVG paths, 50 properties with images | `src/lib/data.ts` |
+| `RootLayout` | HTML shell, font loading, global CSS | `fewog-app/src/app/layout.tsx` |
+| `Home` | Landing page: hero, service dock, contact strip | `fewog-app/src/app/page.tsx` |
+| `WohnenPage` | Property A-Z list + animated detail panel | `fewog-app/src/app/wohnen/page.tsx` |
+| `ServicePage` | Static content: Mietertreff, publications, rentals | `fewog-app/src/app/service/page.tsx` |
+| `UeberUnsPage` | Static content: history, governance, Satzung | `fewog-app/src/app/ueberuns/page.tsx` |
+| `AktuellesPage` | Static content: notices, waiting list, METRONA | `fewog-app/src/app/aktuelles/page.tsx` |
+| `MietermagazinArchivPage` | Archive list of annual tenant magazines as PDFs | `fewog-app/src/app/service/mietermagazin-archiv/page.tsx` |
+| `GeschaeftsberichtArchivPage` | Archive list of annual reports as PDFs | `fewog-app/src/app/service/geschaeftsbericht-archiv/page.tsx` |
+| `ImpressumPage` | Legal imprint (§5 TMG) | `fewog-app/src/app/impressum/page.tsx` |
+| `DatenschutzPage` | DSGVO privacy statement | `fewog-app/src/app/datenschutz/page.tsx` |
+| `Nav` | Sticky top nav, desktop links + mobile burger dropdown | `fewog-app/src/components/nav.tsx` |
+| `Footer` | Copyright bar + Impressum/Datenschutz links | `fewog-app/src/components/footer.tsx` |
+| `ContactStrip` | 3-column office hours / phone / address strip | `fewog-app/src/components/contact-strip.tsx` |
+| `ServiceTile` | Clickable card: icon + title + description | `fewog-app/src/components/service-tile.tsx` |
+| `Icon` | Named SVG icon collection (no external icon lib) | `fewog-app/src/components/icons.tsx` |
+| `FEWOG_DATA` | All property, district, and meta data (static TS) | `fewog-app/src/lib/data.ts` |
 
 ## Pattern Overview
 
-**Overall:** Client-only SPA running inside the Next.js App Router shell.
+**Overall:** Multi-page client-rendered React app inside Next.js App Router shell. All pages are marked `'use client'` and rendered entirely in the browser. There is no server-side data fetching and no Sanity CMS integration yet despite packages being installed.
 
 **Key Characteristics:**
-- Every page file declares `'use client'` — no React Server Components in page layer
-- Navigation is driven by `useRouter().push()` inside `Nav`, but each page also maintains a `page: string` state that is threaded down to `Nav` as a prop for active-link styling
-- `RootLayout` (`src/app/layout.tsx`) is the only file without `'use client'` — the only true server component; wraps all pages with fonts and global CSS
-- Data is fully hardcoded in `src/lib/data.ts` — no fetching, no Sanity CMS integration yet
-- No shared layout wraps individual page segments — each page independently instantiates `<Nav>` and `<Footer>`
+- Every `page.tsx` file uses `'use client'` at the top — no RSC (React Server Components) in use
+- All content is hardcoded: either in `FEWOG_DATA` (property data) or directly as JSX strings in page files
+- Navigation active state is managed via local `useState('page-name')` in each page — not derived from the URL router
+- Framer Motion used for animation on two specific interactions: mobile nav dropdown and property detail panel slide-in/swipe
 
 ## Layers
 
-**Root Layout (Server Component):**
-- Purpose: HTML `<html>` shell with Geist font CSS variables, antialiasing, global CSS import
-- Location: `src/app/layout.tsx`
-- Contains: `<html lang="en">`, `<body>`, Geist font declarations, `Metadata` export
-- Depends on: `src/app/globals.css`
-- Used by: All pages (Next.js App Router convention)
+**App Layer (Pages):**
+- Purpose: Route-level UI composition. Each page owns its full layout including Nav and Footer.
+- Location: `fewog-app/src/app/`
+- Contains: `page.tsx` per route, root `layout.tsx`, `globals.css`
+- Depends on: components, lib/data
+- Used by: Next.js router
 
-**Page Layer (Client Components):**
-- Purpose: Route-specific page composition and local UI state
-- Location: `src/app/page.tsx`, `src/app/wohnen/page.tsx`, `src/app/aktuelles/page.tsx`, `src/app/service/page.tsx`, `src/app/ueberuns/page.tsx`
-- Contains: Layout composition, local `useState`, `useMemo`, `useEffect`, `useRef`
-- Depends on: `src/components/`, `src/lib/data.ts`
-- Used by: Next.js router via file-system routing
+**Component Layer:**
+- Purpose: Reusable UI building blocks shared across pages
+- Location: `fewog-app/src/components/`
+- Contains: Nav, Footer, ContactStrip, ServiceTile, Icon
+- Depends on: lib/data (Nav indirectly via router)
+- Used by: all page files
 
-**Component Layer (Client Components):**
-- Purpose: Reusable presentational and interactive UI primitives
-- Location: `src/components/`
-- Contains: `Nav`, `Footer`, `ContactStrip`, `ServiceTile`, `Icon`
-- Depends on: `src/components/icons.tsx` (internal), nothing from `src/lib/`
-- Used by: All page files
-
-**Data Layer (Static Module):**
-- Purpose: Single source of truth for all FEWOG content
-- Location: `src/lib/data.ts`
-- Contains: TypeScript interfaces (`Property`, `District`, `FewogData`) and `FEWOG_DATA` constant (50 properties, 3 districts, site meta)
-- Depends on: Nothing
-- Used by: `src/app/page.tsx`, `src/app/wohnen/page.tsx`
-
-## Routing Strategy
-
-**Framework:** Next.js 15 App Router (file-system routing under `src/app/`)
-
-**Current routes:**
-
-| URL | File | Notes |
-|-----|------|-------|
-| `/` | `src/app/page.tsx` | Hero + service dock |
-| `/wohnen` | `src/app/wohnen/page.tsx` | Property list with detail panel |
-| `/service` | `src/app/service/page.tsx` | Services + downloads |
-| `/ueberuns` | `src/app/ueberuns/page.tsx` | About + governance |
-| `/aktuelles` | `src/app/aktuelles/page.tsx` | Announcements |
-| `/impressum` | `src/app/impressum/page.tsx` | Legal Impressum (German law) |
-| `/datenschutz` | `src/app/datenschutz/page.tsx` | DSGVO Datenschutzerklärung |
-
-**Navigation pattern (hybrid, partially incorrect):**
-
-`Nav` uses `useRouter().push()` from `next/navigation` for real URL changes. However, every page also holds a `page: string` local state set to its own route key (e.g., `useState('wohnen')`) and passes it as prop to `Nav` for active-link highlighting. This is redundant — `Nav` could derive the active route from `usePathname()` instead.
-
-The home page (`src/app/page.tsx`) additionally uses a `useEffect` watching `page` state to call `window.location.href = '/wohnen'` — a full-page reload anti-pattern that duplicates what `useRouter` already handles correctly in `Nav`.
-
-**Hash-based anchor navigation:** The Service page uses `id` attributes on sections (`#mietertreff`, `#mietermagazin`) with `scrollMarginTop: 80` for anchor links from the Home page's `ServiceTile` `href` props.
+**Data Layer:**
+- Purpose: Single source of truth for all property data, district definitions, and org meta stats
+- Location: `fewog-app/src/lib/data.ts`
+- Contains: TypeScript interfaces (`Property`, `District`, `FewogData`) + `FEWOG_DATA` constant
+- Depends on: nothing
+- Used by: `fewog-app/src/app/page.tsx` (home), `fewog-app/src/app/wohnen/page.tsx`
 
 ## Data Flow
 
-### Primary Request Path (Static content pages: Aktuelles, Service, Über uns)
+### Primary Request Path (All Routes)
 
-1. Next.js App Router serves the client bundle — no server-side data fetch
-2. Page component mounts in browser
-3. JSX renders hardcoded HTML content directly
+1. Next.js serves pre-rendered HTML from Vercel edge (`fewog-app/src/app/[route]/page.tsx`)
+2. React hydrates client-side (`'use client'` directive on every page)
+3. Property data imported directly from `fewog-app/src/lib/data.ts` — no fetch, no API call
+4. UI rendered from static data constant
 
-### Property Listing (Wohnen)
+### Property Detail Flow (Wohnen page)
 
-1. `WohnenPage` mounts (`src/app/wohnen/page.tsx`)
-2. `FEWOG_DATA.properties` imported at module level from `src/lib/data.ts` (50 entries)
-3. `useMemo` → `filtered`: sorts properties alphabetically by `street` (German locale via `localeCompare`)
-4. `useMemo` → `grouped`: groups sorted properties by first letter of street name into `{ letter, items }` array
-5. User clicks a `.bestand-row` → `setSelectedProperty(prop)` triggers conditional render of detail panel
-6. Detail panel slides in via CSS keyframe animation `slideInRight`
+1. User lands on `/wohnen` — `WohnenPage` renders full property list from `FEWOG_DATA.properties`
+2. Properties sorted alphabetically via `useMemo` + `Array.sort` with German locale (`'de'`)
+3. Properties grouped by first letter of street name via second `useMemo`
+4. User clicks a row → `setSelectedProperty(prop)` triggers detail panel mount
+5. `useLayoutEffect` fires: `framer-motion/animate` slides panel in from off-screen right (x: offscreen → 0, 320ms)
+6. On mobile: `useEffect` attaches non-passive `touchmove` listener to detect horizontal swipe direction
+7. Swipe right > 80px triggers panel close with slide-out animation; smaller swipe springs back to 0
 
-### Mobile Swipe-to-Close (Wohnen detail panel)
+### Mobile Navigation Flow
 
-Replaced with Framer Motion (commit `c7d7080`):
-1. `useMotionValue(0)` tracks the panel's horizontal offset (`panelX`)
-2. Touch `onTouchStart`/`onTouchMove`/`onTouchEnd` handlers on the panel update `panelX.set(delta)` for live feedback
-3. On release: if swipe delta > 80px → `animate(panelX, window.innerWidth, ...)` then `setSelectedProperty(null)`; otherwise spring back to 0
-4. Framer Motion `<motion.div>` binds `style={{ x: panelX }}` — no direct DOM style writes
-5. Direction lock: once horizontal swipe is detected, vertical scrolling is suppressed for that gesture
-
-### Home → Wohnen Navigation (anti-pattern)
-
-1. User clicks "Wohnungsbestand ansehen" → `onClick={() => setPage("wohnen")}`
-2. `useEffect` in `src/app/page.tsx` watches `page`, detects `"wohnen"`, calls `window.location.href = '/wohnen'`
-3. Causes full page reload instead of client-side navigation
+1. Burger button click → `setOpen(true)` in `Nav` component (`fewog-app/src/components/nav.tsx`)
+2. `AnimatePresence` + `motion.div` animates dropdown: `height: 0 → 'auto'`, `opacity: 0 → 1`, 220ms
+3. Nav link click → `router.push('/route')` from `next/navigation`
 
 **State Management:**
-- No global store (no Redux, Zustand, Context)
-- All state is local `useState` per page component
-- `selectedProperty: Property | null` in `WohnenPage` controls detail panel
-- `open: boolean` in `Nav` controls mobile hamburger
+- No global state. Each page holds its own `useState` for active nav key and selected property.
+- Nav active state is manually initialized per page: `useState('wohnen')` in WohnenPage, `useState('service')` in ServicePage, etc.
+- No context, no Zustand, no Redux.
 
 ## Key Abstractions
 
 **FEWOG_DATA:**
-- Purpose: Central typed constant holding all site content (properties, districts, meta stats)
-- File: `src/lib/data.ts`
-- Pattern: Single exported constant + TypeScript interfaces; no runtime fetching
+- Purpose: Central data store for all 50 properties, 3 districts, and org statistics
+- Location: `fewog-app/src/lib/data.ts`
+- Pattern: Single exported constant of type `FewogData`; TypeScript interfaces `Property`, `District`, `FewogData` define the shape
 
-**Icon namespace:**
-- Purpose: Centralised inline SVG icons, no external icon library dependency
-- File: `src/components/icons.tsx`
-- Pattern: Object of React functional components — `Icon.wrench`, `Icon.phone`, `Icon.burger`, etc.
-- Available icons: `arrow`, `search`, `close`, `burger`, `phone`, `mail`, `clock`, `wrench`, `community`, `doc`, `leaf`, `home`, `pin`
+**Icon object:**
+- Purpose: Named SVG icon components — avoids external icon library dependency
+- Location: `fewog-app/src/components/icons.tsx`
+- Pattern: `Icon.wrench`, `Icon.doc`, `Icon.burger`, etc. — all are arrow functions returning inline SVGs
 
-**ServiceTile dual-mode rendering:**
-- File: `src/components/service-tile.tsx`
-- Pattern: Accepts optional `href` and `onClick` props; renders as `<a>` if `href` is provided, `<div>` otherwise
+**Content blocks:**
+- Purpose: Standardized card container for content-heavy pages (Service, Über uns, Aktuelles)
+- Location: CSS class `.content-block` in `fewog-app/src/app/globals.css`
+- Pattern: `<div className="content-block">` with `h2`, `h3`, `p`, `a.btn` children — used consistently across all static pages
 
 ## Entry Points
 
-**Root layout:**
-- Location: `src/app/layout.tsx`
-- Triggers: Every page render (App Router convention)
-- Responsibilities: HTML document shell, Geist fonts, `globals.css` import
+**Root Layout:**
+- Location: `fewog-app/src/app/layout.tsx`
+- Triggers: Every page render
+- Responsibilities: Loads Geist fonts via `next/font/google`, applies `globals.css`, sets HTML shell
 
-**Home page:**
-- Location: `src/app/page.tsx`
-- Triggers: GET `/`
-- Responsibilities: Hero section with FEWOG stats, service dock with 3 `ServiceTile` cards, `ContactStrip`, `Footer`
+**Home Page:**
+- Location: `fewog-app/src/app/page.tsx`
+- Triggers: Route `/`
+- Responsibilities: Hero section, service dock, contact strip, footer composition
 
-**Wohnen:**
-- Location: `src/app/wohnen/page.tsx`
-- Triggers: GET `/wohnen`
-- Responsibilities: A–Z property list grouped by letter, slide-in detail panel, mobile swipe gesture
-
-## Rendering Strategy
-
-| Route | Strategy | Notes |
-|-------|----------|-------|
-| `/` | CSR (`'use client'`) | Rendered in browser; FEWOG_DATA stats bundled at build time |
-| `/wohnen` | CSR (`'use client'`) | All 50 properties bundled at build time; detail panel via Framer Motion |
-| `/aktuelles` | CSR (`'use client'`) | Static HTML content; `'use client'` only needed for Nav active state |
-| `/service` | CSR (`'use client'`) | Static HTML content; same redundant `'use client'` usage |
-| `/ueberuns` | CSR (`'use client'`) | Static HTML content; same redundant `'use client'` usage |
-| `/impressum` | CSR (`'use client'`) | Static legal page |
-| `/datenschutz` | CSR (`'use client'`) | Static privacy policy page |
-| `layout.tsx` | Server Component | Only server component — no `'use client'` directive |
-
-No SSR, ISR, `generateStaticParams`, or `defineLive` / `<SanityLive />` is used. No Sanity integration is implemented yet.
+**Wohnen Page:**
+- Location: `fewog-app/src/app/wohnen/page.tsx`
+- Triggers: Route `/wohnen`
+- Responsibilities: Property list with alphabetical grouping and animated detail panel — most complex page in the codebase (~208 lines)
 
 ## Architectural Constraints
 
-- **All pages are client components:** Every page file starts with `'use client'`. RSC streaming, server-side fetching, and bundle-splitting benefits are unused.
-- **No shared page layout:** There is no `src/app/(main)/layout.tsx` or any nested layout. Each page re-instantiates `<Nav>` and `<Footer>` independently.
-- **Global state:** None. Navigation state (`page`) is duplicated across every page component.
-- **Direct DOM manipulation:** `src/app/wohnen/page.tsx` directly writes to `detailRef.current.style.transform` and `.style.transition` for swipe animation — bypassing React's rendering cycle.
-- **No Sanity integration yet:** Packages installed (`sanity@^5.25.0`, `next-sanity@^11.6.13`, `@sanity/image-url@^2.1.1`, `@portabletext/react@^6.2.0`) but no `src/sanity/` directory, no schemas, no queries, no Sanity client.
-- **External images via raw `<img>`:** Property images reference `https://www.fewog.de/fileadmin/_processed_/...` and homepage hero uses Unsplash. `next/image` is not used; `next.config.ts` has no `remotePatterns`.
-- **`lang="en"` on German site:** `src/app/layout.tsx` sets `<html lang="en">` — should be `"de"`.
-- **Placeholder metadata:** Root layout exports `title: "Create Next App"` — no FEWOG-specific metadata defined.
+- **Rendering model:** All pages are client-side rendered (`'use client'`). Next.js App Router SSR/RSC features are not used. No `generateMetadata`, no streaming, no server actions.
+- **No CMS integration:** Sanity packages (`sanity`, `next-sanity`, `@sanity/image-url`, `@portabletext/react`, `@sanity/locale-de-de`) are installed in `package.json` but no `sanity.config.ts`, no schema files, no `/studio` route, and no `SanityLive` or `defineLive` usage exists anywhere in the codebase.
+- **Global state:** None. State is local to each page component.
+- **Circular imports:** None detected.
+- **Threading:** Single-threaded browser JS. No web workers.
+- **Fonts:** Geist and Geist Mono loaded via `next/font/google` in `layout.tsx`. Additional fonts referenced in CSS design system (`Fraunces`, `Montserrat`, `Inter`, `JetBrains Mono`) at lines 21–24 of `globals.css` are NOT loaded via `next/font` — they fall through to system font fallbacks at runtime.
+- **Images:** All images use plain `<img>` tags with absolute external URLs (Unsplash placeholder on home page, fewog.de CDN for properties). `next/image` is not used. No `remotePatterns` configured in `next.config.ts`.
 
 ## Anti-Patterns
 
-### Page-owned Nav/Footer instantiation
+### Active nav state via per-page useState
 
-**What happens:** Each page file imports and renders `<Nav page={page} setPage={setPage}>` and `<Footer>` directly.
-**Why it's wrong:** Breaks App Router layout composition; causes Nav and Footer to re-mount on every route transition; any nav change requires editing all five page files.
-**Do this instead:** Move `Nav` and `Footer` into `src/app/(main)/layout.tsx` and use `usePathname()` in `Nav` to derive the active link — eliminating the `page`/`setPage` prop pattern.
+**What happens:** Each page initializes `const [page, setPage] = useState('pageName')` and passes it to `<Nav page={page} setPage={setPage} />`.
+**Why it's wrong:** Active state is redundant — `usePathname()` from `next/navigation` already exposes the current route. The pattern duplicates routing knowledge into component props and causes inconsistency (datenschutz/impressum use `useState('')`).
+**Do this instead:** Derive active nav key from `usePathname()` inside `Nav` itself. Remove the `page`/`setPage` props from all page files.
 
-### `'use client'` on static content pages
+### Hardcoded content in JSX
 
-**What happens:** `src/app/aktuelles/page.tsx`, `src/app/service/page.tsx`, and `src/app/ueberuns/page.tsx` declare `'use client'` but only use `useState` for the Nav active-key prop.
-**Why it's wrong:** Sends unnecessary JS to the browser for pages that are entirely static HTML. Prevents SSG and server rendering.
-**Do this instead:** After moving Nav to a shared layout (above), remove `'use client'` from these pages — enabling static generation.
+**What happens:** All page content (history text, office hours, PDF links, contact details, archive lists) is written directly as JSX strings in page files such as `fewog-app/src/app/service/page.tsx` and `fewog-app/src/app/ueberuns/page.tsx`.
+**Why it's wrong:** Content cannot be updated without a code deploy. This contradicts the project's core value: "Genossenschaftsvorstand kann alle Inhalte selbstständig und ohne Programmierkenntnisse pflegen."
+**Do this instead:** Migrate content to Sanity CMS using the planned `defineLive` + `SanityLive` integration. Create schemas for page content, documents/downloads, and news.
 
-### `window.location.href` navigation in Home
+### lang="en" on German-language site
 
-**What happens:** `src/app/page.tsx` uses `useEffect` watching a `page` state string, then calls `window.location.href = '/wohnen'` when it becomes `"wohnen"`.
-**Why it's wrong:** Causes a full page reload instead of a client-side transition; bypasses Next.js router prefetching.
-**Do this instead:** Call `router.push('/wohnen')` directly in the button's `onClick` handler, same as `Nav` does in `src/components/nav.tsx:21`.
+**What happens:** `<html lang="en">` is set in `fewog-app/src/app/layout.tsx` line 26.
+**Why it's wrong:** Screen readers and browser translation features announce the page as English. Violates WCAG 2.1 AA Success Criterion 3.1.1.
+**Do this instead:** Change to `<html lang="de">` in `fewog-app/src/app/layout.tsx`.
 
-### Raw `<img>` instead of `next/image`
+### Missing next/image
 
-**What happens:** All images (property photos, hero image) use standard HTML `<img>` tags with absolute external URLs.
-**Why it's wrong:** No lazy loading, no responsive `srcset`, no WebP conversion, no LCP optimization.
-**Do this instead:** Use `<Image>` from `next/image` with `remotePatterns` in `next.config.ts` for `www.fewog.de` and `images.unsplash.com`.
+**What happens:** All images use plain `<img>` tags with absolute external URLs in `fewog-app/src/app/page.tsx` and `fewog-app/src/app/wohnen/page.tsx`.
+**Why it's wrong:** No optimization (no WebP conversion, no lazy loading, no layout shift prevention, no responsive `srcset`). The fewog.de CDN URLs become obsolete once images migrate to Sanity.
+**Do this instead:** Use `next/image` with `remotePatterns` in `next.config.ts`, or use the `next-sanity/image` loader once Sanity is integrated.
 
 ## Error Handling
 
-**Strategy:** None implemented.
+**Strategy:** None. There is no error handling in the application.
 
 **Patterns:**
-- No error boundaries
-- No `src/app/error.tsx` or `src/app/not-found.tsx`
-- No try/catch (not applicable while data is a static import)
+- No `try/catch` blocks (no async operations exist)
+- No `error.tsx` boundary route defined
+- No `not-found.tsx` route defined
+- No loading states
 
 ## Cross-Cutting Concerns
 
-**Styling:** Single global CSS file `src/app/globals.css` (~780 lines). Uses CSS custom properties (design tokens) + Tailwind v4 (`@import "tailwindcss"`). Tailwind utilities are used only in `src/app/layout.tsx` for body flex setup. All component-level styles use semantic class names defined in `globals.css` (`.nav`, `.hero`, `.bestand-row`, `.service-tile`, etc.).
-
-**Fonts:** Geist Sans + Geist Mono loaded via `next/font/google` in `src/app/layout.tsx`. FEWOG design system additionally references Fraunces (display), Montserrat (heading), Inter (body) as CSS `--f-*` variables — these are not loaded via `next/font` and will not be available unless added via a CDN link or font import.
-
-**Responsive design:** Two CSS breakpoints in `globals.css`: tablet (`max-width: 960px`) and mobile (`max-width: 768px`). On mobile, the detail panel switches from a sticky sidebar to a `position: fixed` full-screen overlay with `slideInFromRight` animation.
-
 **Logging:** None.
-**Validation:** None.
-**Authentication:** None (fully public website).
-**Accessibility:** `aria-label` on nav burger and detail-panel close button. Missing: `lang="de"` on `<html>`, skip-to-content link, focus management when detail panel opens.
-
-## Planned Architecture (CLAUDE.md) vs Current State
-
-| Area | CLAUDE.md Target | Current State |
-|------|-----------------|---------------|
-| CMS | Sanity v5 + next-sanity v11 + `defineLive` | Packages installed, not wired up |
-| Data fetching | `defineLive` + `<SanityLive />` for live updates | Static TypeScript constant in `src/lib/data.ts` |
-| Studio | Embedded at `/studio` route | No studio route exists |
-| Image handling | `next-sanity/image` loader or `next/image` + `remotePatterns` | Raw `<img>` tags, no optimization |
-| Rendering | Server Components + ISR via `defineLive` | All pages are `'use client'` CSR |
-| Metadata | Per-page German metadata | Placeholder English metadata in root layout only |
-| Types | Sanity TypeGen-generated types | Hand-authored interfaces in `src/lib/data.ts` |
+**Validation:** None. No forms exist yet.
+**Authentication:** None. The site is entirely public.
 
 ---
 
