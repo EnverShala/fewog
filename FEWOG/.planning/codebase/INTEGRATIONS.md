@@ -90,10 +90,8 @@ Based on CLAUDE.md and installed-but-unconfigured packages:
 4. **Sanity image migration** — Replace hotlinked images with Sanity CDN via `next-sanity/image` loader
 5. **`sanity-plugin-media`** — Media browser plugin not yet installed
 6. **Sanity CORS configuration** — Must add `https://fewog.de` and `http://localhost:3000` to Sanity project CORS settings
-7. **DSGVO / Datenschutz page** — Required by CLAUDE.md (`/datenschutz` route missing)
-8. **Impressum page** — Required German legal page; not yet created
-9. **Damage report form (Mängelmelder)** — Referenced in homepage service tile; no form implementation exists
-10. **Vercel connection** — Production deployment not yet configured
+7. **Damage report form (Mängelmelder)** — Referenced in homepage service tile; no form implementation exists
+8. **Vercel connection** — Production deployment not yet configured
 
 ---
 

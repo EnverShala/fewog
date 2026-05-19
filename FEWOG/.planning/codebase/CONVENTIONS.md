@@ -210,6 +210,19 @@ JSX section dividers mark major layout blocks within page components:
 
 No JSDoc annotations are used anywhere in the current codebase.
 
+## Framer Motion Usage
+
+Framer Motion is used exclusively in `src/app/wohnen/page.tsx` for the mobile detail panel. The pattern is **imperative, not declarative**:
+
+- `useMotionValue(0)` tracks the panel's horizontal drag offset — not React state
+- `animate(motionValue, target, options)` imperatively drives animations (slide-in on mount, spring-back or dismiss on swipe release)
+- `<motion.div style={{ x: panelX }}>` binds the motion value to the DOM — no `animate` prop on the element
+- Touch event handlers (`onTouchStart`, `onTouchMove`, `onTouchEnd`) update `panelX.set(delta)` directly for real-time feedback
+- `useLayoutEffect` triggers the entry animation immediately after mount (avoids a frame flash)
+- Direction lock: first-move gesture determines axis; once horizontal, vertical scroll is suppressed for that touch
+
+**Do not** use Framer Motion declarative `animate={{ x: ... }}` props or `whileDrag` on new additions — the established pattern is imperative `useMotionValue` + `animate()` calls.
+
 ## Linting Configuration
 
 ESLint 9 with flat config format at `fewog-app/eslint.config.mjs`. Uses `@eslint/eslintrc` `FlatCompat` to bridge legacy `next/core-web-vitals` and `next/typescript` rulesets into the flat config system. No custom rules are added beyond the Next.js defaults.

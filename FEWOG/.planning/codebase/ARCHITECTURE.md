@@ -107,6 +107,8 @@ Static-first corporate website for FEWOG (Fellbacher Wohnungsbau-Genossenschaft 
 | `/service` | `src/app/service/page.tsx` | Services + downloads |
 | `/ueberuns` | `src/app/ueberuns/page.tsx` | About + governance |
 | `/aktuelles` | `src/app/aktuelles/page.tsx` | Announcements |
+| `/impressum` | `src/app/impressum/page.tsx` | Legal Impressum (German law) |
+| `/datenschutz` | `src/app/datenschutz/page.tsx` | DSGVO Datenschutzerklärung |
 
 **Navigation pattern (hybrid, partially incorrect):**
 
@@ -135,10 +137,12 @@ The home page (`src/app/page.tsx`) additionally uses a `useEffect` watching `pag
 
 ### Mobile Swipe-to-Close (Wohnen detail panel)
 
-1. `onTouchStart` on `.bestand-detail-col` captures `touchStartX.current`
-2. `onTouchMove` applies `translateX(delta)` directly to `detailRef.current.style.transform` (bypasses React)
-3. `onTouchEnd`: if `delta > 80px`, calls `closeDetail()`
-4. `closeDetail()` sets CSS transition `translateX(100%)` on the ref, then `setTimeout(() => setSelectedProperty(null), 320)` to unmount after animation
+Replaced with Framer Motion (commit `c7d7080`):
+1. `useMotionValue(0)` tracks the panel's horizontal offset (`panelX`)
+2. Touch `onTouchStart`/`onTouchMove`/`onTouchEnd` handlers on the panel update `panelX.set(delta)` for live feedback
+3. On release: if swipe delta > 80px → `animate(panelX, window.innerWidth, ...)` then `setSelectedProperty(null)`; otherwise spring back to 0
+4. Framer Motion `<motion.div>` binds `style={{ x: panelX }}` — no direct DOM style writes
+5. Direction lock: once horizontal swipe is detected, vertical scrolling is suppressed for that gesture
 
 ### Home → Wohnen Navigation (anti-pattern)
 
@@ -191,10 +195,12 @@ The home page (`src/app/page.tsx`) additionally uses a `useEffect` watching `pag
 | Route | Strategy | Notes |
 |-------|----------|-------|
 | `/` | CSR (`'use client'`) | Rendered in browser; FEWOG_DATA stats bundled at build time |
-| `/wohnen` | CSR (`'use client'`) | All 50 properties bundled at build time; detail panel via local state |
+| `/wohnen` | CSR (`'use client'`) | All 50 properties bundled at build time; detail panel via Framer Motion |
 | `/aktuelles` | CSR (`'use client'`) | Static HTML content; `'use client'` only needed for Nav active state |
 | `/service` | CSR (`'use client'`) | Static HTML content; same redundant `'use client'` usage |
 | `/ueberuns` | CSR (`'use client'`) | Static HTML content; same redundant `'use client'` usage |
+| `/impressum` | CSR (`'use client'`) | Static legal page |
+| `/datenschutz` | CSR (`'use client'`) | Static privacy policy page |
 | `layout.tsx` | Server Component | Only server component — no `'use client'` directive |
 
 No SSR, ISR, `generateStaticParams`, or `defineLive` / `<SanityLive />` is used. No Sanity integration is implemented yet.

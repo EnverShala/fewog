@@ -57,6 +57,7 @@ npm run lint     # eslint
 | `@sanity/image-url` | `^2.1.1` | Sanity CDN image URL builder |
 | `@portabletext/react` | `^6.2.0` | Render Portable Text (Sanity rich text) |
 | `@sanity/locale-de-de` | `^1.1.31` | German UI locale for Sanity Studio |
+| `framer-motion` | `^12.39.0` | Animation library — swipe panel, motion values |
 | `tailwindcss` | `^4` | Utility-first CSS (v4) |
 | `@tailwindcss/postcss` | `^4` | PostCSS plugin for Tailwind v4 |
 | `typescript` | `^5` | Static typing |
@@ -75,6 +76,8 @@ fewog-app/src/
 │   ├── page.tsx          # Homepage ('use client')
 │   ├── globals.css       # Design system tokens + Tailwind import + global styles
 │   ├── aktuelles/        # News/Aktuelles page
+│   ├── datenschutz/      # DSGVO Datenschutzerklärung page
+│   ├── impressum/        # Legal Impressum page
 │   ├── service/          # Service page
 │   ├── ueberuns/         # About/Über Uns page
 │   └── wohnen/           # Property listing page (with detail slide-out panel)

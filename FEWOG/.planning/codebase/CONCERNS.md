@@ -15,9 +15,9 @@
 - Issue: `src/app/layout.tsx` has no `<SanityLive />` component. Without it, content changes in Studio will never appear on the site without a full redeploy. The `defineLive` + `<SanityLive />` pattern mandated by CLAUDE.md is not implemented anywhere.
 - Files: `fewog-app/src/app/layout.tsx`
 
-**Impressum and Datenschutz pages are missing — legal violations:**
-- Issue: `src/components/footer.tsx` line 16 renders `<a>Impressum</a> · <a>Datenschutz</a> · <a>AGB</a>` links with no `href` attributes. No corresponding routes exist under `src/app/`. A missing Impressum violates §5 TMG. A missing Datenschutzerklärung violates DSGVO Article 13/14. Both are mandatory for any German public-facing website.
-- Files: `fewog-app/src/components/footer.tsx:16`, no `src/app/impressum/`, no `src/app/datenschutz/`
+**Footer Impressum/Datenschutz links may have no `href` — verify:**
+- Issue: `src/components/footer.tsx` line 16 historically rendered `<a>Impressum</a> · <a>Datenschutz</a>` with no `href`. Both pages now exist (`src/app/impressum/page.tsx`, `src/app/datenschutz/page.tsx`) but the footer links should be verified to point to `/impressum` and `/datenschutz`.
+- Files: `fewog-app/src/components/footer.tsx:16`
 
 ---
 
@@ -168,7 +168,7 @@ The `Design/` directory contains an HTML/CSS/JS prototype that the Next.js app i
 | Filter/search | Present in prototype views | No search or filter UI in `wohnen/page.tsx` |
 | Sanity CMS | Not in prototype (static JS) | Packages installed, nothing configured |
 | Fonts | Fraunces + Montserrat in `Design/styles.css` | Only Geist loaded in `layout.tsx` |
-| DSGVO/Impressum | Not in prototype | Not in implementation either |
+| DSGVO/Impressum | Not in prototype | `impressum/page.tsx` and `datenschutz/page.tsx` created |
 
 ---
 
@@ -188,8 +188,8 @@ All Sanity packages are installed but none are used. The full Sanity integration
 | Sanity TypeGen (`sanity.types.ts`) | Not generated |
 | `next.config.ts` with `cdn.sanity.io` remote pattern | Not configured |
 | `next/image` replacing `<img>` tags | Not done |
-| DSGVO Datenschutz page | Not created (legally required) |
-| Impressum page | Not created (legally required, §5 TMG) |
+| DSGVO Datenschutz page | Created (`src/app/datenschutz/page.tsx`) — verify footer link |
+| Impressum page | Created (`src/app/impressum/page.tsx`) — verify footer link |
 | Skip-to-content link | Not created (WCAG 2.1 SC 2.4.1) |
 | `sitemap.ts` | Not created |
 

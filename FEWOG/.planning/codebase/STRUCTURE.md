@@ -28,6 +28,10 @@ FEWOG/                          # Repo root
 │       │   ├── favicon.ico
 │       │   ├── aktuelles/
 │       │   │   └── page.tsx    # /aktuelles — news and announcements
+│       │   ├── datenschutz/
+│       │   │   └── page.tsx    # /datenschutz — DSGVO Datenschutzerklärung
+│       │   ├── impressum/
+│       │   │   └── page.tsx    # /impressum — German legal Impressum
 │       │   ├── service/
 │       │   │   └── page.tsx    # /service — services, downloads, room rentals
 │       │   ├── ueberuns/
@@ -111,6 +115,8 @@ FEWOG/                          # Repo root
 | `/aktuelles` | `src/app/aktuelles/page.tsx` | CSR | `page: string` | Hardcoded JSX |
 | `/service` | `src/app/service/page.tsx` | CSR | `page: string` | Hardcoded JSX |
 | `/ueberuns` | `src/app/ueberuns/page.tsx` | CSR | `page: string` | Hardcoded JSX |
+| `/impressum` | `src/app/impressum/page.tsx` | CSR | `page: string` | Hardcoded JSX |
+| `/datenschutz` | `src/app/datenschutz/page.tsx` | CSR | `page: string` | Hardcoded JSX |
 
 ## Component Inventory
 
