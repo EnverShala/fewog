@@ -583,6 +583,13 @@ a:hover { text-decoration: none; }
   /* Info grid */
   .info-grid { grid-template-columns: 1fr; }
 
+  /* Archiv */
+  .archiv-row {
+    grid-template-columns: 64px 1fr;
+    grid-template-rows: auto auto;
+  }
+  .archiv-row .btn { grid-column: 2; justify-self: start; margin-top: 4px; }
+
   /* Bestand */
   .bestand { padding: 20px 0; }
 
