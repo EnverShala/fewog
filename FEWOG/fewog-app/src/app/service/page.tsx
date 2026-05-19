@@ -109,7 +109,7 @@ export default function ServicePage() {
               Die FEWOG vermietet zwei Ferienwohnungen in ihrem Geschäftsgebäude an Mieter, Mitglieder und Besucher von Fellbach.
             </p>
             <p>
-              <strong>Bei Fragen oder Interesse kontaktieren Sie uns bitte telefonisch unter der Nummer 0711 578815-0 oder senden eine E-Mail an <a href="mailto:info@fewog.de">info@fewog.de</a>.</strong>
+              <strong>Bei Fragen oder Interesse kontaktieren Sie uns bitte telefonisch unter der Nummer <a href="tel:+4971157881500">0711 578815-0</a> oder senden eine E-Mail an <a href="mailto:info@fewog.de">info@fewog.de</a>.</strong>
             </p>
             <p>
               Die Nutzungsbedingungen zu unseren Ferienwohnungen finden Sie <a href="https://www.fewog.de/fileadmin/PDF/_Nutzungsbedingungen_Ferienwohnung.pdf" target="_blank" rel="noopener noreferrer">hier</a>.
