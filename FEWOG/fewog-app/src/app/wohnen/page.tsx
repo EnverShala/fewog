@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { FEWOG_DATA } from '@/lib/data';
@@ -16,6 +16,7 @@ const panelTransition = {
 export default function WohnenPage() {
   const [page, setPage] = useState('wohnen');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const dragControls = useDragControls();
 
   const filtered = useMemo(() => {
     return [...FEWOG_DATA.properties].sort((a, b) => a.street.localeCompare(b.street, "de"));
@@ -88,8 +89,13 @@ export default function WohnenPage() {
                   exit={{ x: '100%' }}
                   transition={panelTransition}
                   drag="x"
+                  dragControls={dragControls}
+                  dragListener={false}
                   dragConstraints={{ left: 0 }}
                   dragElastic={{ left: 0, right: 0.3 }}
+                  onPointerDown={(e) => {
+                    if (e.pointerType === 'touch') dragControls.start(e);
+                  }}
                   onDragEnd={(_, info) => {
                     if (info.offset.x > 80) setSelectedProperty(null);
                   }}
