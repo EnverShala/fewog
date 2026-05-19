@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef, useLayoutEffect } from 'react';
+import { useState, useMemo, useRef, useLayoutEffect, useEffect } from 'react';
 import { motion, animate, useMotionValue } from 'framer-motion';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -14,15 +14,18 @@ export default function WohnenPage() {
   const [page, setPage] = useState('wohnen');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
-  const panelRef    = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-  const dragDelta   = useRef(0);
-  const entryAnim   = useRef<ReturnType<typeof animate> | null>(null);
-  const x           = useMotionValue(0);
+  const panelRef     = useRef<HTMLDivElement>(null);
+  const touchStartX  = useRef(0);
+  const touchStartY  = useRef(0);
+  const dragDelta    = useRef(0);
+  const isHorizontal = useRef<boolean | null>(null); // null = direction not yet decided
+  const entryAnim    = useRef<ReturnType<typeof animate> | null>(null);
+  const x            = useMotionValue(0);
 
-  const offscreen = () => panelRef.current?.offsetWidth ?? (typeof window !== 'undefined' ? window.innerWidth : 500);
+  const offscreen = () =>
+    panelRef.current?.offsetWidth ?? (typeof window !== 'undefined' ? window.innerWidth : 500);
 
-  // Slide in: set x to off-screen instantly, then animate to 0
+  // Slide in when panel mounts
   useLayoutEffect(() => {
     if (!selectedProperty) return;
     x.set(offscreen());
@@ -31,28 +34,49 @@ export default function WohnenPage() {
     return () => { ctrl.stop(); };
   }, [selectedProperty?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Non-passive touchmove so we can call preventDefault() for horizontal swipes.
+  // React synthetic events are passive — they cannot prevent the browser's native scroll.
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el || !selectedProperty) return;
+
+    const onMove = (e: TouchEvent) => {
+      if (isHorizontal.current === null) {
+        const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
+        const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+        if (dx < 4 && dy < 4) return; // wait for clear intent
+        isHorizontal.current = dx > dy;
+      }
+      if (!isHorizontal.current) return; // vertical — let browser scroll
+
+      e.preventDefault(); // block scroll while swiping right
+      const delta = e.touches[0].clientX - touchStartX.current;
+      if (delta > 0) {
+        dragDelta.current = delta;
+        x.set(delta);
+      }
+    };
+
+    el.addEventListener('touchmove', onMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onMove);
+  }, [selectedProperty?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const closePanel = async () => {
     entryAnim.current?.stop();
     await animate(x, offscreen(), { duration: DUR, ease: EASE });
     setSelectedProperty(null);
   };
 
-  // Touch handlers only — no pointer/mouse events, no drag prop
   const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    dragDelta.current   = 0;
+    touchStartX.current  = e.touches[0].clientX;
+    touchStartY.current  = e.touches[0].clientY;
+    dragDelta.current    = 0;
+    isHorizontal.current = null;
     entryAnim.current?.stop();
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
-    const delta = e.touches[0].clientX - touchStartX.current;
-    if (delta > 0) {
-      dragDelta.current = delta;
-      x.set(delta);
-    }
-  };
-
   const onTouchEnd = async () => {
+    if (isHorizontal.current !== true) return; // was a scroll, not a swipe
     if (dragDelta.current > 80) {
       await animate(x, offscreen(), { duration: DUR, ease: EASE });
       setSelectedProperty(null);
@@ -121,7 +145,7 @@ export default function WohnenPage() {
               </div>
             </div>
 
-            {/* Detail Panel — position controlled entirely via x MotionValue */}
+            {/* Detail Panel */}
             {selectedProperty && (
               <motion.div
                 key={selectedProperty.id}
@@ -129,7 +153,6 @@ export default function WohnenPage() {
                 className="bestand-detail-col"
                 style={{ x }}
                 onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
               >
                 <div className="property-detail-panel">
