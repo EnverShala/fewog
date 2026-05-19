@@ -35,7 +35,7 @@ export default function Home() {
           <div className="hero-grid">
             <div>
               <div className="hero-eyebrow">
-                <span className="eyebrow">Wohnraum für Fellbach · seit 1949</span>
+                <span className="eyebrow">Wohnraum für Fellbach · seit 1948</span>
               </div>
               <h1 className="hero-title">
                 Genossenschaftliches Wohnen.

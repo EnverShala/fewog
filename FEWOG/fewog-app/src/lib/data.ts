@@ -36,9 +36,9 @@ export interface FewogData {
 
 export const FEWOG_DATA: FewogData = {
   meta: {
-    founded: 1949,
-    units: 612,
-    members: 1480,
+    founded: 1948,
+    units: 676,
+    members: 1200,
     properties: 50,
     city: "Fellbach",
   },

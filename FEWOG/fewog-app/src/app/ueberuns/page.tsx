@@ -15,7 +15,7 @@ export default function UeberUnsPage() {
       <section className="page-head page-head-simple">
         <div className="wrap">
           <h1>WIR ÜBER UNS</h1>
-          <p className="lead">Die Fellbacher Wohnungsbaugenossenschaft eG seit 1949</p>
+          <p className="lead">Die Fellbacher Wohnungsbaugenossenschaft eG seit 1948</p>
         </div>
       </section>
 
