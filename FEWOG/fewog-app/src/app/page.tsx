@@ -61,7 +61,7 @@ export default function Home() {
                   <div className="stat-lbl">Mitglieder</div>
                 </div>
                 <div>
-                  <div className="stat-num">{2026 - FEWOG_DATA.meta.founded}</div>
+                  <div className="stat-num">{new Date() >= new Date(new Date().getFullYear(), 8, 9) ? new Date().getFullYear() - 1948 : new Date().getFullYear() - 1948 - 1}</div>
                   <div className="stat-lbl">Jahre Fellbach</div>
                 </div>
               </div>
