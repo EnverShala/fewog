@@ -354,7 +354,7 @@ a:hover { text-decoration: none; }
 .bestand-list {
 }
 .bestand-row {
-  display: grid; grid-template-columns: 1fr 80px 60px;
+  display: grid; grid-template-columns: 1fr auto;
   align-items: center;
   gap: 16px; padding: 18px 8px;
   border-bottom: 1px solid var(--c-line-soft);
@@ -371,13 +371,9 @@ a:hover { text-decoration: none; }
 .prop-meta {
   font-size: 13px; color: var(--c-ink-soft);
 }
-.col-num {
-  font-family: var(--f-head); font-size: 14px; font-weight: 500;
-  text-align: right;
-}
-.col-idx {
-  font-family: var(--f-mono); font-size: 11px; color: var(--c-ink-mute);
-  letter-spacing: 0.06em; text-align: right;
+.col-district {
+  font-family: var(--f-head); font-size: 13px; color: var(--c-ink-soft);
+  text-align: right; white-space: nowrap;
 }
 
 .bestand-letter {
@@ -499,7 +495,7 @@ a:hover { text-decoration: none; }
   .overview-tile { border-right: 0; border-bottom: 1px solid var(--c-line); }
   .overview-tile:last-child { border-bottom: 0; }
   .bestand-row { grid-template-columns: 1fr; }
-  .col-num, .col-idx { display: none; }
+  .col-district { display: none; }
   .bestand-layout { flex-direction: column; align-items: stretch; }
   .bestand-detail-col { width: 100%; position: static; }
   .property-detail-panel { flex-direction: column; }

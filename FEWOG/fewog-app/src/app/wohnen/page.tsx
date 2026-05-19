@@ -136,8 +136,7 @@ export default function WohnenPage() {
                             {prop.year} · {prop.units} Wohnungen · {prop.rooms} · {prop.sanierung !== prop.year ? `Saniert ${prop.sanierung}` : 'Ursprungsbau'}
                           </div>
                         </div>
-                        <div className="col-num">{prop.units}</div>
-                        <div className="col-idx">{prop.id.toUpperCase()}</div>
+                        <div className="col-district">{districtById[prop.district]?.name ?? 'Fellbach'}</div>
                       </div>
                     ))}
                   </div>

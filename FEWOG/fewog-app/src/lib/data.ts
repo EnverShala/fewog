@@ -54,7 +54,7 @@ export const FEWOG_DATA: FewogData = {
     },
     {
       id: "schmiden",
-      name: "Schmiden",
+      name: "Fellbach-Schmiden",
       tagline: "Historischer Ortskern, Kappelberg-Nähe",
       color: "salbei",
       path: "M 440 90 L 580 110 L 620 180 L 580 240 L 470 245 L 430 180 Z",
@@ -62,7 +62,7 @@ export const FEWOG_DATA: FewogData = {
     },
     {
       id: "oeffingen",
-      name: "Oeffingen",
+      name: "Fellbach-Oeffingen",
       tagline: "Ländlich, Streuobstwiesen",
       color: "sand",
       path: "M 580 280 L 700 270 L 750 350 L 700 430 L 590 440 L 540 370 Z",
