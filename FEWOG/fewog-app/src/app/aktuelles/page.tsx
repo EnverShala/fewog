@@ -58,7 +58,7 @@ export default function AktuellesPage() {
               Der Mietertreff in der Lessingstraße 2 findet jeden ersten Dienstag im Monat von 15:00 bis 17:00 Uhr statt. Im Juli und August finden dort keine Mietertreffen statt.
             </p>
             <p>
-              Im Gemeinschaftsraum der Gartenstraße 84 gibt es an jedem dritten Dienstag im Monat ab 15:30 Uhr einen „Offenen Treff".
+              Im Gemeinschaftsraum der Gartenstraße 84 gibt es an jedem dritten Dienstag im Monat ab 15:30 Uhr einen {`„Offenen Treff"`}.
             </p>
             <p>
               Weitere Infos finden Sie unter dem Menüpunkt SERVICE beziehungsweise ggf. in den entsprechenden Aushängen an den Häusern.

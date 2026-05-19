@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { Icon } from './icons';
 
 export function Footer() {
   return (
