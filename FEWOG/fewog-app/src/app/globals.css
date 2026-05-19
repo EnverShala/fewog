@@ -233,6 +233,12 @@ a:hover { text-decoration: none; }
   font-weight: 400; font-size: 13px; color: var(--c-ink-soft);
   font-family: var(--f-body); margin-top: 4px;
 }
+.contact-strip a {
+  transition: color .15s;
+}
+.contact-strip a:hover {
+  color: var(--c-secondary);
+}
 
 /* Page Header */
 .page-head {
