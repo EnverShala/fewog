@@ -85,7 +85,7 @@ export default function DatenschutzPage() {
             <p>
               Diese Seite nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher
               Inhalte eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen
-              Sie daran, dass die Adresszeile des Browsers von „http://" auf „https://" wechselt und
+              Sie daran, dass die Adresszeile des Browsers von „http://&#34; auf „https://&#34; wechselt und
               an dem Schloss-Symbol in Ihrer Browserzeile.
             </p>
           </div>
@@ -107,7 +107,7 @@ export default function DatenschutzPage() {
             <h2>4. Datenerfassung auf unserer Website</h2>
             <h3>Cookies</h3>
             <p>
-              Unsere Internetseiten verwenden sogenannte „Cookies". Cookies sind kleine Textdateien
+              Unsere Internetseiten verwenden sogenannte &#34;Cookies&#34;. Cookies sind kleine Textdateien
               und richten auf Ihrem Endgerät keinen Schaden an. Sie werden entweder vorübergehend für
               die Dauer einer Sitzung (Session-Cookies) oder dauerhaft auf Ihrem Endgerät gespeichert
               (permanente Cookies). Session-Cookies werden nach Ende Ihres Besuchs automatisch gelöscht.
@@ -155,7 +155,7 @@ export default function DatenschutzPage() {
               die Google Inc., 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA.
             </p>
             <p>
-              Google Analytics verwendet sogenannte „Cookies". Die durch den Cookie erzeugten
+              Google Analytics verwendet sogenannte &#34;Cookies&#34;. Die durch den Cookie erzeugten
               Informationen über Ihre Benutzung dieser Website werden in der Regel an einen Server
               von Google in den USA übertragen und dort gespeichert. Rechtsgrundlage: Art. 6 Abs. 1
               lit. f DSGVO.
@@ -176,7 +176,7 @@ export default function DatenschutzPage() {
             </p>
             <h3>Google reCAPTCHA</h3>
             <p>
-              Wir nutzen „Google reCAPTCHA" auf unseren Websites. Anbieter ist Google Inc.,
+              Wir nutzen &#34;Google reCAPTCHA&#34; auf unseren Websites. Anbieter ist Google Inc.,
               1600 Amphitheatre Parkway, Mountain View, CA 94043, USA. Mit reCAPTCHA soll überprüft
               werden, ob die Dateneingabe auf unseren Websites durch einen Menschen oder durch ein
               automatisiertes Programm erfolgt. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
