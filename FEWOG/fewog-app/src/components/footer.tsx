@@ -13,7 +13,7 @@ export function Footer() {
         </div>
         <div className="footer-bottom" style={{ marginTop: 24 }}>
           <span>© 1949–2026 FEWOG eG · Fellbach</span>
-          <span><a style={{ display: "inline" }}>Impressum</a> · <a style={{ display: "inline" }}>Datenschutz</a> · <a style={{ display: "inline" }}>AGB</a></span>
+          <span><a href="/impressum" style={{ display: "inline" }}>Impressum</a> · <a href="/datenschutz" style={{ display: "inline" }}>Datenschutz</a></span>
         </div>
       </div>
     </footer>
