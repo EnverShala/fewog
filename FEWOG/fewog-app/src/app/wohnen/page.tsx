@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useLayoutEffect } from 'react';
-import { motion, animate } from 'framer-motion';
+import { motion, animate, useMotionValue } from 'framer-motion';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { FEWOG_DATA } from '@/lib/data';
@@ -18,24 +18,26 @@ export default function WohnenPage() {
   const touchStartX = useRef(0);
   const dragDelta   = useRef(0);
   const entryAnim   = useRef<ReturnType<typeof animate> | null>(null);
+  const x           = useMotionValue(0);
 
-  // Slide in when a new panel mounts
+  const offscreen = () => panelRef.current?.offsetWidth ?? (typeof window !== 'undefined' ? window.innerWidth : 500);
+
+  // Slide in: set x to off-screen instantly, then animate to 0
   useLayoutEffect(() => {
-    if (!panelRef.current || !selectedProperty) return;
-    const ctrl = animate(panelRef.current, { x: 0 }, { duration: DUR, ease: EASE });
+    if (!selectedProperty) return;
+    x.set(offscreen());
+    const ctrl = animate(x, 0, { duration: DUR, ease: EASE });
     entryAnim.current = ctrl;
-    return () => ctrl.stop();
-  }, [selectedProperty?.id]);
+    return () => { ctrl.stop(); };
+  }, [selectedProperty?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const closePanel = async () => {
     entryAnim.current?.stop();
-    if (panelRef.current) {
-      await animate(panelRef.current, { x: '100%' }, { duration: DUR, ease: EASE });
-    }
+    await animate(x, offscreen(), { duration: DUR, ease: EASE });
     setSelectedProperty(null);
   };
 
-  // Touch-only swipe handlers — no mouse interaction possible
+  // Touch handlers only — no pointer/mouse events, no drag prop
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     dragDelta.current   = 0;
@@ -44,19 +46,18 @@ export default function WohnenPage() {
 
   const onTouchMove = (e: React.TouchEvent) => {
     const delta = e.touches[0].clientX - touchStartX.current;
-    if (delta > 0 && panelRef.current) {
+    if (delta > 0) {
       dragDelta.current = delta;
-      panelRef.current.style.transform = `translateX(${delta}px)`;
+      x.set(delta);
     }
   };
 
   const onTouchEnd = async () => {
-    if (!panelRef.current) return;
     if (dragDelta.current > 80) {
-      await animate(panelRef.current, { x: '100%' }, { duration: DUR, ease: EASE });
+      await animate(x, offscreen(), { duration: DUR, ease: EASE });
       setSelectedProperty(null);
     } else {
-      animate(panelRef.current, { x: 0 }, { duration: 0.2 });
+      animate(x, 0, { duration: 0.2 });
     }
   };
 
@@ -120,13 +121,13 @@ export default function WohnenPage() {
               </div>
             </div>
 
-            {/* Detail Panel — enters via FM animate(), exits via swipe or close button */}
+            {/* Detail Panel — position controlled entirely via x MotionValue */}
             {selectedProperty && (
               <motion.div
                 key={selectedProperty.id}
                 ref={panelRef}
                 className="bestand-detail-col"
-                initial={{ x: '100%' }}
+                style={{ x }}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
