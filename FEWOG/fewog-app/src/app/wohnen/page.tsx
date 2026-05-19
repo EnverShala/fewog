@@ -23,13 +23,19 @@ export default function WohnenPage() {
       detailRef.current.style.transform = `translateX(${delta}px)`;
   };
 
+  const closeDetail = () => {
+    if (detailRef.current) {
+      detailRef.current.style.transition = 'transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      detailRef.current.style.transform = 'translateX(100%)';
+    }
+    setTimeout(() => setSelectedProperty(null), 320);
+  };
+
   const handleTouchEnd = (e: React.TouchEvent) => {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (!detailRef.current) return;
     if (delta > 80) {
-      detailRef.current.style.transition = 'transform 0.25s ease-out';
-      detailRef.current.style.transform = 'translateX(100%)';
-      setTimeout(() => setSelectedProperty(null), 250);
+      closeDetail();
     } else {
       detailRef.current.style.transition = 'transform 0.2s ease-out';
       detailRef.current.style.transform = 'translateX(0)';
@@ -116,7 +122,7 @@ export default function WohnenPage() {
                         {districtById[selectedProperty.district]?.name || 'Fellbach'}
                       </div>
                     </div>
-                    <button className="detail-close" onClick={() => setSelectedProperty(null)} aria-label="Schließen">
+                    <button className="detail-close" onClick={closeDetail} aria-label="Schließen">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M6 6l12 12M18 6 6 18"/>
                       </svg>
