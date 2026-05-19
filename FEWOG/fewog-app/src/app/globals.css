@@ -401,11 +401,6 @@ a:hover { text-decoration: none; }
   flex-shrink: 0;
   position: sticky;
   top: 80px;
-  animation: slideInRight 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(56px); }
-  to   { opacity: 1; transform: translateX(0); }
 }
 
 .property-detail-panel {
@@ -583,7 +578,6 @@ a:hover { text-decoration: none; }
     overflow-y: auto;
     background: var(--c-bg);
     width: 100%;
-    animation: slideInFromRight 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
   }
   .property-detail-panel {
     border-radius: 0;
@@ -592,10 +586,6 @@ a:hover { text-decoration: none; }
   }
 }
 
-@keyframes slideInFromRight {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
-}
 
 /* Content Sections */
 .content-section { padding: 48px 0; background: var(--c-bg); }
