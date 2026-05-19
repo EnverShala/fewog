@@ -489,6 +489,20 @@ a:hover { text-decoration: none; }
 /* Info grid (service page Mietertreff) */
 .info-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
 
+.archiv-list { margin-top: 24px; border-top: 1px solid var(--c-line); }
+.archiv-row {
+  display: grid; grid-template-columns: 64px 1fr auto;
+  align-items: center; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid var(--c-line-soft);
+}
+.archiv-year {
+  font-family: var(--f-mono); font-size: 13px; font-weight: 600;
+  color: var(--c-primary); letter-spacing: 0.06em;
+}
+.archiv-title {
+  font-family: var(--f-head); font-size: 15px; color: var(--c-ink);
+}
+
 /* Responsive — tablet */
 @media (max-width: 960px) {
   .overview-grid { grid-template-columns: 1fr; }

@@ -68,7 +68,7 @@ export default function ServicePage() {
               </a>
             </p>
             <p>
-              <a href="https://www.fewog.de/service/mietermagazin/mietermagazin-archiv.html" target="_blank" rel="noopener noreferrer">
+              <a href="/service/mietermagazin-archiv">
                 zum Archiv {'>'}{'>'}
               </a>
             </p>
@@ -92,7 +92,7 @@ export default function ServicePage() {
               </a>
             </p>
             <p>
-              <a href="https://www.fewog.de/service/geschaeftsbericht/geschaeftsbericht-archiv.html" target="_blank" rel="noopener noreferrer">
+              <a href="/service/geschaeftsbericht-archiv">
                 zum Archiv {'>'}{'>'}
               </a>
             </p>
