@@ -8,6 +8,7 @@ import { schemaTypes } from './src/sanity/schemaTypes'
 export default defineConfig({
   name: 'fewog-studio',
   title: 'FEWOG Studio',
+  basePath: '/studio',
 
   projectId: 'uat139ly',
   dataset: 'production',

@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import path from 'path'
 
 const nextConfig: NextConfig = {
   images: {
@@ -9,20 +10,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Keep Sanity and related packages out of the RSC webpack bundle.
-  // Without this, Next.js resolves react with the 'react-server' export
-  // condition when analyzing the studio route's dependency tree, which
-  // strips useEffectEvent (sanity 5.x) and Controller/useForm (sanity-plugin-media).
-  serverExternalPackages: [
-    'sanity',
-    'next-sanity',
-    'sanity-plugin-media',
-    'react-hook-form',
-    '@sanity/vision',
-    '@sanity/locale-de-de',
-    '@sanity/ui',
-    '@sanity/icons',
-  ],
+  webpack: (config, { isServer, dir }) => {
+    if (!isServer) {
+      // Next.js 15.5.x ships React 19.2.0-canary which is missing useEffectEvent.
+      // Sanity 5.x calls React.useEffectEvent in the structure tool.
+      // Patch the compiled React dev + prod bundles to add a minimal polyfill.
+      config.module.rules.unshift({
+        test: /next[/\\]dist[/\\]compiled[/\\]react[/\\]cjs[/\\]react\.(development|production\.min)\.js$/,
+        loader: path.resolve(dir, 'src/lib/use-effect-event-loader.cjs'),
+      })
+    }
+    return config
+  },
 }
 
 export default nextConfig
