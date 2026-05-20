@@ -66,6 +66,18 @@ export const liegenschaftSchema = defineType({
       group: 'wohnungen',
     }),
     defineField({
+      name: 'zimmer',
+      title: 'Zimmergröße (z.B. 2–3 Zi.)',
+      type: 'string',
+      group: 'wohnungen',
+    }),
+    defineField({
+      name: 'sanierungsjahr',
+      title: 'Sanierungsjahr',
+      type: 'number',
+      group: 'grunddaten',
+    }),
+    defineField({
       name: 'verfuegbar',
       title: 'Wohnungen verfügbar?',
       type: 'boolean',
