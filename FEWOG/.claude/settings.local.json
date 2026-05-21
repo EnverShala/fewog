@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\Vizionists\\\\FEWOG\\\\FEWOG\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(npm audit *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vercel *)",
+      "Bash(npx next *)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)"
+    ]
+  }
+}

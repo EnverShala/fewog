@@ -53,7 +53,7 @@ export default defineConfig({
           ]),
     }),
     media(),
-    visionTool(),
+    ...(process.env.NODE_ENV !== 'production' ? [visionTool()] : []),
     deDELocale(),
   ],
 

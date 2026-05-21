@@ -1,105 +1,129 @@
 # Technology Stack
 
-**Analysis Date:** 2026-05-19
+**Analysis Date:** 2026-05-21
 
-## Runtime & Framework
+## Languages
 
-- **Runtime:** Node.js (version not pinned; no `.nvmrc` or `.node-version` present)
-- **Framework:** Next.js **15.5.18** (App Router) — `fewog-app/next.config.ts`
-  - Config file is currently minimal (empty options object)
-  - **Do NOT upgrade to Next.js 16** — `SanityLive` / `defineLive` is incompatible (4–10x API request spike per CLAUDE.md)
-- **React:** 19.2.4
+**Primary:**
+- TypeScript 5.x — all source files in `fewog-app/src/` (`.ts` / `.tsx`)
 
-## Languages & Typing
+**Secondary:**
+- CSS — global design tokens and component styles in `fewog-app/src/app/globals.css`
+- CommonJS (`.cjs`) — one webpack loader shim at `fewog-app/src/lib/use-effect-event-loader.cjs`
 
-- **TypeScript:** `^5` (devDependency) — strict mode enabled (`"strict": true` in `tsconfig.json`)
-- **Target:** ES2017, module resolution `bundler`
-- **Path alias:** `@/*` → `./src/*`
-- **JSX:** `"jsx": "preserve"` — Next.js handles the JSX transform
-- All source files in `src/` use `.tsx` / `.ts`
+## Runtime
 
-## Styling
+**Environment:**
+- Node.js v26.1.0 (current dev environment; no `.nvmrc` / `.node-version` — version not pinned in repo)
 
-- **Tailwind CSS:** `^4` (v4 — new CSS-first configuration, no `tailwind.config.*` file)
-- **PostCSS integration:** `@tailwindcss/postcss` `^4` via `fewog-app/postcss.config.mjs`
-- **Global CSS entry:** `fewog-app/src/app/globals.css`
-  - Imports Tailwind with `@import "tailwindcss"`
-  - Defines FEWOG design system via CSS custom properties (`--c-primary` #8B1D28, `--c-secondary` #4A5D4E, `--c-bg` #FDF8F7, etc.)
-  - Typography scale: Fraunces (display serif), Montserrat/Inter (headings), Inter/Lato (body) — referenced in CSS vars
-  - `@theme inline` block bridges CSS vars into Tailwind theme
-  - Tailwind utility classes used in layout and pages alongside custom classes (`.btn`, `.hero`, `.wrap`, `.nav`, `.footer`)
-- **Fonts:** Geist Sans and Geist Mono loaded via `next/font/google` in `fewog-app/src/app/layout.tsx`; Fraunces and Montserrat referenced in CSS vars but **not loaded via `next/font`** (potential FOUC)
+**Package Manager:**
+- npm
+- Lockfile: `fewog-app/package-lock.json` (lockfileVersion 3) — present and committed
 
-## Build & Tooling
+## Frameworks
 
-- **Package manager:** npm (`fewog-app/package.json`)
-- **Linting:** ESLint `^9` — flat config (`fewog-app/eslint.config.mjs`), uses `FlatCompat` to extend `next/core-web-vitals` and `next/typescript`
-- **No test runner configured** (no jest/vitest/playwright config files)
-- **No Prettier or Biome config**
+**Core:**
+- Next.js **15.5.18** (exact pin, App Router) — `fewog-app/next.config.ts`
+  - **CRITICAL: DO NOT upgrade to Next.js 16.** `SanityLive` / `defineLive` is incompatible with Next.js 16 (4–10x API request spike). See `CLAUDE.md`.
+- React 19.2.4 (exact pin) — `fewog-app/package.json`
 
-**Build commands** (from `fewog-app/package.json` scripts):
-```bash
-npm run dev      # next dev
-npm run build    # next build
-npm run start    # next start
-npm run lint     # eslint
-```
+**Styling:**
+- Tailwind CSS `^4` (v4, CSS-first config — no `tailwind.config.*` file)
+- `@tailwindcss/postcss` `^4` — PostCSS integration via `fewog-app/postcss.config.mjs`
+- Global CSS entry: `fewog-app/src/app/globals.css` — imports Tailwind, defines FEWOG design tokens as CSS custom properties (`--c-primary`, `--c-secondary`, etc.), bridges tokens into Tailwind via `@theme inline`
+
+**Animation:**
+- framer-motion `^12.39.0` — used for swipe/slide animations on property panels
+
+**Testing:**
+- Not configured (no jest, vitest, or playwright config found)
+
+**Build/Dev:**
+- ESLint `^9` (flat config) — `fewog-app/eslint.config.mjs`, extends `next/core-web-vitals` and `next/typescript`
+- No Prettier or Biome config present
 
 ## Key Dependencies
 
-| Package | package.json version | Purpose |
-|---------|---------------------|---------|
-| `next` | `15.5.18` (exact) | App Router framework |
-| `react` | `19.2.4` (exact) | UI library |
-| `react-dom` | `19.2.4` (exact) | DOM renderer |
-| `sanity` | `^5.25.0` | Sanity Studio v3 runtime + client |
-| `next-sanity` | `^11.6.13` | Next.js/Sanity integration: `defineLive`, `SanityLive`, Studio embed |
-| `@sanity/image-url` | `^2.1.1` | Sanity CDN image URL builder |
-| `@portabletext/react` | `^6.2.0` | Render Portable Text (Sanity rich text) |
-| `@sanity/locale-de-de` | `^1.1.31` | German UI locale for Sanity Studio |
-| `framer-motion` | `^12.39.0` | Animation library — swipe panel, motion values |
-| `tailwindcss` | `^4` | Utility-first CSS (v4) |
-| `@tailwindcss/postcss` | `^4` | PostCSS plugin for Tailwind v4 |
-| `typescript` | `^5` | Static typing |
-| `eslint` | `^9` | Linting |
-| `eslint-config-next` | `15.5.18` (exact) | Next.js ESLint ruleset |
-| `@types/node` | `^20` | Node.js types |
-| `@types/react` | `^19` | React types |
-| `@types/react-dom` | `^19` | React DOM types |
+**Critical — CMS Integration:**
+- `sanity` `^5.25.0` — Sanity Studio v3 runtime + GROQ client
+- `next-sanity` `^11.6.13` — Next.js/Sanity toolkit: `defineLive`, `SanityLive`, `NextStudio` embed, `createClient`
+  - **Pin at v11.x.** v12 not yet stable for production (May 2026).
+- `@sanity/image-url` `^2.1.1` — Sanity CDN image URL builder (`urlFor()` in `fewog-app/src/sanity/image.ts`)
+- `@portabletext/react` `^6.2.0` — Renders Sanity Portable Text / rich text blocks
 
-## Source Structure
+**Sanity Studio Plugins:**
+- `sanity-plugin-media` `^4.3.0` — Media browser / asset management UI in Studio
+- `@sanity/locale-de-de` `^1.1.31` — German locale for Sanity Studio UI (`deDELocale()`)
+- `@sanity/vision` `^5.26.0` — GROQ query explorer (enabled in dev only)
 
+**Infrastructure:**
+- `typescript` `^5` — Static typing, strict mode
+- `@types/node` `^20`, `@types/react` `^19`, `@types/react-dom` `^19` — Type definitions
+- `eslint-config-next` `15.5.18` — Next.js ESLint ruleset (pinned to match Next.js version)
+
+## TypeScript Configuration
+
+**File:** `fewog-app/tsconfig.json`
+
+- `"target": "ES2017"`
+- `"strict": true` — strict mode enabled
+- `"moduleResolution": "bundler"` — Next.js 15 bundler resolution
+- `"jsx": "preserve"` — Next.js handles JSX transform
+- Path alias: `@/*` → `./src/*`
+- `"incremental": true` — faster subsequent builds
+
+## Webpack Shim (Known Compatibility Fix)
+
+**File:** `fewog-app/src/lib/use-effect-event-loader.cjs`
+**Registered in:** `fewog-app/next.config.ts` (webpack rules)
+
+Next.js 15.5.x ships React 19.2.0-canary which omits `useEffectEvent`. Sanity 5.x requires it. The shim polyfills `useEffectEvent` in both the Next.js compiled React bundle and the real `node_modules/react` ESM chunks. **Do not remove this shim** until the underlying React/Next.js version issue is resolved.
+
+## Build Commands
+
+```bash
+npm run dev      # next dev — development server
+npm run build    # next build — production build
+npm run start    # next start — production server
+npm run lint     # eslint
 ```
-fewog-app/src/
-├── app/                  # Next.js App Router pages
-│   ├── layout.tsx        # Root layout (fonts, body wrapper)
-│   ├── page.tsx          # Homepage ('use client')
-│   ├── globals.css       # Design system tokens + Tailwind import + global styles
-│   ├── aktuelles/        # News/Aktuelles page
-│   ├── datenschutz/      # DSGVO Datenschutzerklärung page
-│   ├── impressum/        # Legal Impressum page
-│   ├── service/          # Service page (+ mietermagazin-archiv, geschaeftsbericht-archiv subroutes)
-│   ├── ueberuns/         # About/Über Uns page
-│   └── wohnen/           # Property listing page (with detail slide-out panel)
-├── components/           # Shared UI components
-│   ├── nav.tsx
-│   ├── footer.tsx
-│   ├── contact-strip.tsx
-│   ├── service-tile.tsx
-│   └── icons.tsx
-├── lib/
-│   └── data.ts           # Static FEWOG_DATA (50 properties, 3 districts, org meta)
-└── types/                # Present but empty
-```
+(All commands run from `fewog-app/` directory)
 
-## Notable Absences (planned per CLAUDE.md, not yet installed/configured)
+## Configuration Files
 
-- `sanity-plugin-media` — not in `package.json`
-- Sanity Studio route (`src/app/studio/`) — `next-sanity` installed but no studio route
-- `sanity.config.ts`, `sanity.cli.ts`, `schemaTypes/` — Sanity SDK installed but project not initialized
-- Sanity environment variable references — no `.env.local` or `NEXT_PUBLIC_SANITY_*` found in source
-- `sanity-typegen` — TypeGen not set up
+| File | Purpose |
+|------|---------|
+| `fewog-app/next.config.ts` | Next.js config: image CDN allowlist, security headers, Sanity transpilePackages, webpack shim |
+| `fewog-app/sanity.config.ts` | Sanity Studio config: project ID, dataset, plugins, schema registry, Studio structure |
+| `fewog-app/tsconfig.json` | TypeScript compiler options |
+| `fewog-app/postcss.config.mjs` | PostCSS: Tailwind v4 plugin |
+| `fewog-app/eslint.config.mjs` | ESLint flat config extending Next.js rules |
+| `fewog-app/.env.example` | Template for required environment variables |
+| `fewog-app/public/robots.txt` | Crawler rules: allow all except `/studio/` |
+
+## Security Headers
+
+Defined in `fewog-app/next.config.ts`, applied to all routes **except** `/studio` (Studio requires iframes for preview):
+
+| Header | Value |
+|--------|-------|
+| `X-Frame-Options` | `DENY` |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` |
+| `X-DNS-Prefetch-Control` | `on` |
+
+## Platform Requirements
+
+**Development:**
+- Node.js (v20+ recommended; v26.1.0 confirmed working)
+- npm
+- Environment variables in `fewog-app/.env.local` (see INTEGRATIONS.md)
+
+**Production:**
+- Vercel (Free Tier) — target deployment platform
+- Environment variables set in Vercel dashboard
 
 ---
 
-*Stack analysis: 2026-05-19*
+*Stack analysis: 2026-05-21*

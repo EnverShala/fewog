@@ -1,66 +1,64 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-05-19
+**Analysis Date:** 2026-05-21
+
+## Naming Patterns
+
+**Files:**
+- Page server components: `page.tsx` (Next.js App Router convention)
+- Page client components: `[route-segment]-client.tsx` — e.g., `home-client.tsx`, `wohnen-client.tsx`, `datenschutz-client.tsx`
+- Shared components: `kebab-case.tsx` — e.g., `contact-strip.tsx`, `service-tile.tsx`
+- Sanity schema files: `[schemaname].ts` lowercased — e.g., `einstellungen.ts`, `liegenschaft.ts`
+- Sanity utility files: flat short names — `client.ts`, `live.ts`, `env.ts`, `image.ts`, `queries.ts`
+
+**Exported component functions:**
+- Named exports (PascalCase) for shared components: `export function Nav(...)`, `export function Footer(...)`, `export function ContactStrip(...)`
+- Default exports for page-level client components: `export default function HomeClient(...)`, `export default function WohnenClient(...)`
+- Default exports (async) for server page components: `export default async function WohnenPage()`
+
+**Variables and constants:**
+- `SCREAMING_SNAKE_CASE` for module-level constants: `ICON_MAP`, `NAV_LINKS`, `DEFAULT_TILES`, `FALLBACK`, `FEWOG_DATA`, `EASE`, `DUR`, `STADTTEIL_LABEL`
+- `camelCase` for local variables, parameters, and state
+- `PascalCase` for type and interface names: `KontaktData`, `StartseiteData`, `Liegenschaft`, `Neuigkeit`
+
+**Sanity schema exports:**
+- Named export per file: `export const [name]Schema = defineType(...)` — e.g., `export const einstellungenSchema`, `export const liegenschaftSchema`
+
+**Sanity query exports:**
+- Query string: `export const [name]Query = \`...\`` — e.g., `kontaktQuery`, `startseiteQuery`
+- Matching TypeScript type: `export type [Name]Data = {...}` co-located with its query in `src/sanity/queries.ts`
 
 ## TypeScript Usage
 
 **Strict mode:** `"strict": true` in `fewog-app/tsconfig.json`. Enables `strictNullChecks`, `noImplicitAny`, and all other strict checks. Target is `ES2017`, `moduleResolution` is `bundler`, `isolatedModules` is `true`.
 
-**Interfaces for object shapes.** Use `interface` for props and domain models — not `type` aliases:
-
-```ts
-// fewog-app/src/lib/data.ts
-export interface Property {
-  id: string;
-  district: string;
-  street: string;
-  year: number;
-  units: number;
-  rooms: string;
-  sanierung: number;
-  imageUrl: string;
-  pos?: [number, number];       // optional tuple
-}
-```
-
 **`import type`** for type-only imports (required by `"isolatedModules": true`):
-```ts
-import type { Property } from '@/lib/data';
+```typescript
+import type { KontaktData, StartseiteData } from '@/sanity/queries';
 ```
 
-**Generic state typed explicitly** when not inferred:
-```ts
-const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-const panelRef = useRef<HTMLDivElement>(null);
-const entryAnim = useRef<ReturnType<typeof animate> | null>(null);
+**Props typing — inline object type** for page-level components (default export pattern):
+```typescript
+// src/app/wohnen/wohnen-client.tsx
+export default function WohnenClient({
+  liegenschaften,
+  fallbackImageUrl,
+}: {
+  liegenschaften: Liegenschaft[]
+  fallbackImageUrl: string | null
+}) {
 ```
 
-**Tuple casting** used for animation easing constants:
-```ts
-const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
-```
+**Props typing — named `interface`** for shared/reusable components:
+```typescript
+// src/components/nav.tsx
+interface NavProps {
+  page: string;
+  setPage: (page: string) => void;
+}
+export function Nav({ page, setPage }: NavProps)
 
-**Optional chaining** used consistently for nullable access: `selectedProperty?.id`, `districtById[id]?.name`.
-
-**No `any` usage detected** in source files.
-
-## Component Patterns
-
-**All components are function components.** No class components exist anywhere.
-
-**`'use client'` directive:** Every page and shared component carries `'use client'` at the top. The entire app is client-side rendered in the prototype. `src/app/layout.tsx` is the only file without it (Server Component by default in Next.js 15 App Router).
-
-**Named exports for components, default exports for pages:**
-```tsx
-// Shared component — named export
-export function ServiceTile({ icon, title, desc, href, onClick }: ServiceTileProps) { ... }
-
-// Page file — default export
-export default function WohnenPage() { ... }
-```
-
-**Props typing:** A named `interface` declared immediately above the component. Props destructured inline in the signature, never accessed via `props.x`:
-```tsx
+// src/components/service-tile.tsx
 interface ServiceTileProps {
   icon: ReactNode;
   title: string;
@@ -68,200 +66,254 @@ interface ServiceTileProps {
   href?: string;
   onClick?: () => void;
 }
-export function ServiceTile({ icon, title, desc, href, onClick }: ServiceTileProps) { ... }
 ```
 
+Both patterns are in active use. Prefer `interface` for shared components; inline object type is acceptable for page-level client components.
+
+**Nullable Sanity data pattern:** All Sanity query results are typed `T | null`. Server pages pass `data ?? null` or `data ?? []` as props. Client components always accept `null` and fall back to hardcoded defaults:
+```typescript
+const heroTitel = startseite?.heroTitel ?? 'Genossenschaftliches Wohnen.';
+const tiles = startseite?.serviceTiles?.length ? startseite.serviceTiles : DEFAULT_TILES;
+```
+
+**`unknown[]` for Portable Text content:** All Portable Text fields are typed `unknown[] | null` in query types. This is intentional — the Portable Text block shape is a runtime concern of `@portabletext/react`. Cast at the call site:
+```typescript
+<PortableText value={inhalt as Parameters<typeof PortableText>[0]['value']} />
+```
+
+**Non-null assertion (`!`):** Used sparingly after an explicit null guard:
+```typescript
+// src/app/service/service-client.tsx
+if (mmUrl) {
+  return <a ...>{mietermagazin!.titel}</a>;
+}
+```
+
+**Tuple casting** for animation constants:
+```typescript
+const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
+```
+
+**Generic state typed explicitly** when not inferred:
+```typescript
+const [selected, setSelected] = useState<Liegenschaft | null>(null);
+const panelRef = useRef<HTMLDivElement>(null);
+const entryAnim = useRef<ReturnType<typeof animate> | null>(null);
+```
+
+**No `any` usage detected** in source files.
+
+## Component Architecture Pattern
+
+**Server/client split:** Every page follows a strict two-file pattern:
+- `page.tsx` — async Server Component. Calls `sanityFetch(...)`, derives any URL transforms server-side, passes typed props, renders `<SanityLive />` for live updates.
+- `[name]-client.tsx` — `'use client'` component. Receives typed props, manages all local UI state, renders the full page layout (Nav + content sections + Footer).
+
+```typescript
+// page.tsx (server)
+export default async function WohnenPage() {
+  const [{ data: liegenschaften }, { data: einstellungen }] = await Promise.all([
+    sanityFetch({ query: liegenschaftenQuery }),
+    sanityFetch({ query: einstellungenQuery }),
+  ]);
+  return (
+    <>
+      <WohnenClient liegenschaften={liegenschaften ?? []} fallbackImageUrl={fallbackImageUrl} />
+      <SanityLive />
+    </>
+  );
+}
+```
+
+**Nav state pattern:** Every client page component owns `const [page, setPage] = useState('[route-name]')` and passes both to `<Nav page={page} setPage={setPage} />`. Navigation is handled inside `Nav` via `useRouter().push(...)`.
+
+**Sanity fallback pattern:** Every CMS-driven section defines a module-level `DEFAULT_*` constant that mirrors the Sanity query type exactly (including `_key` fields for arrays). Used as fallback when CMS returns null or empty:
+```typescript
+// src/app/home-client.tsx
+const DEFAULT_TILES = [
+  { _key: 'schaden', icon: 'wrench', titel: 'Schaden melden', beschreibung: '...', link: 'mailto:...' },
+]
+const tiles = startseite?.serviceTiles?.length ? startseite.serviceTiles : DEFAULT_TILES;
+```
+
+**All components are function components.** No class components exist anywhere.
+
 **Conditional class names** use string concatenation — no `clsx` or `cn` utility:
-```tsx
-className={'bestand-row' + (selectedProperty?.id === prop.id ? ' selected' : '')}
+```typescript
+className={'bestand-row' + (selected?._id === prop._id ? ' selected' : '')}
 className={'nav-link' + (page === k ? ' active' : '')}
 ```
 
-**Icon namespace pattern** in `fewog-app/src/components/icons.tsx` — inline SVGs collected under a single `Icon` object, each as an arrow function:
-```tsx
+**Icon namespace pattern** in `src/components/icons.tsx` — inline SVGs under a single `Icon` object:
+```typescript
 export const Icon = {
   wrench: () => <svg ...>...</svg>,
-  close:  () => <svg ...>...</svg>,
+  burger: () => <svg ...>...</svg>,
 };
 // Usage: <Icon.wrench />
 ```
 
-**Navigation state pattern:** Every page component owns a `const [page, setPage] = useState('pagename')` and passes it to `<Nav>` for active-link highlighting. `Nav` receives `page` + `setPage` but routes via `useRouter()` internally:
-```tsx
-// wohnen/page.tsx
-const [page, setPage] = useState('wohnen');
-return <Nav page={page} setPage={setPage} />;
-```
-
-**Animation pattern** in `fewog-app/src/app/wohnen/page.tsx` — **imperative, not declarative**:
+**Animation pattern** in `src/app/wohnen/wohnen-client.tsx` — imperative, not declarative:
 - `useMotionValue(0)` for real-time drag offset — never React state
 - `animate(motionValue, target, options)` for programmatic transitions
-- `<motion.div style={{ x }}>` — binds motion value; no `animate` prop on the element
-- `useLayoutEffect` for entry slide-in immediately after mount (avoids frame flash)
-- Non-passive `touchmove` listener registered via `useEffect` for swipe-to-close
+- `<motion.div style={{ x }}>` binds motion value; no `animate` prop on the element
+- `useLayoutEffect` for entry slide-in to avoid frame flash
+- Non-passive `touchmove` listener registered via `useEffect` for swipe-to-close gesture
+
+## Code Style
+
+**Formatting:**
+- No Prettier config file present — code formatting is not enforced by tooling
+- Observed: 2-space indentation, single quotes for strings in `.ts`/`.tsx`
+- Semicolons: newer files (Sanity schemas) omit trailing semicolons on export statements; component files include them. No tooling enforcement.
+
+**Linting:**
+- ESLint 9 with flat config at `fewog-app/eslint.config.mjs`
+- Extends `next/core-web-vitals` and `next/typescript` via `FlatCompat`
+- No custom rules beyond Next.js defaults
+- Two `// eslint-disable-line react-hooks/exhaustive-deps` suppressions in `src/app/wohnen/wohnen-client.tsx` are intentional (animation-keyed effects)
+
+## Import Organization
+
+**Path aliases:** `@/` maps to `./src/` (defined in `fewog-app/tsconfig.json`).
+- Cross-directory: `import { Nav } from '@/components/nav'`
+- Same-directory: `import { Icon } from './icons'`
+
+**Import order (observed, not enforced):**
+1. `'use client'` directive (first line when needed)
+2. React hooks: `useState`, `useEffect`, `useMemo`, `useRef`, `useLayoutEffect`
+3. Third-party: `framer-motion`, `next/navigation`, `next/link`
+4. Internal components via `@/components/...`
+5. Internal lib/sanity via `@/sanity/...` and `@/lib/...`
+6. Type-only imports last: `import type { ... } from '@/sanity/queries'`
+
+**No barrel files.** Components are imported directly by file path — no `src/components/index.ts`.
 
 ## CSS / Styling Approach
 
 **Hybrid: global design-system CSS classes + CSS custom properties + minimal Tailwind utilities.**
 
-**Global CSS classes** in `fewog-app/src/app/globals.css` provide all component-level styling:
+**Global CSS classes** in `src/app/globals.css` handle all component-level styling. Do not recreate these in Tailwind or inline styles:
 ```
-Layout:      .wrap, .hero, .hero-grid, .bestand-layout, .bestand-list-col, .bestand-detail-col
-Nav:         .nav, .nav-inner, .nav-links, .nav-link, .nav-cta, .nav-burger, .nav-mobile-dropdown
-Typography:  .eyebrow, .serif, .mono, .muted
-Buttons:     .btn, .btn-primary, .btn-ghost, .btn-arrow, .btn-download
-Service:     .service-dock, .service-grid, .service-tile
-Contact:     .contact-strip, .contact-cell, .lbl, .val
-Bestand:     .bestand, .bestand-list, .bestand-row, .bestand-letter, .property-detail-panel
-Detail:      .detail-hero, .detail-hero-overlay, .detail-body, .detail-grid, .detail-item, .detail-close
-Pages:       .page-head, .page-head-simple, .content-section, .content-block
-Archive:     .archiv-list, .archiv-row, .archiv-year, .archiv-title
-Utility:     .info-box, .info-grid, .contact-info
-Footer:      .footer, .footer-grid, .footer-bottom
+Layout:    .wrap, .hero, .hero-grid, .bestand-layout
+Nav:       .nav, .nav-inner, .nav-links, .nav-link, .nav-burger, .nav-mobile-dropdown
+Pages:     .page-head, .page-head-simple, .content-section, .content-block
+Service:   .service-dock, .service-grid, .service-tile
+Contact:   .contact-strip, .contact-cell, .lbl, .val
+Bestand:   .bestand, .bestand-list, .bestand-row, .bestand-letter, .property-detail-panel
+Footer:    .footer, .footer-bottom
 ```
 
-**Design tokens** as CSS custom properties in `:root`:
+**Design tokens as CSS custom properties** in `:root`:
 ```css
-/* Brand colors */
---c-primary:        #8B1D28;   /* Kappelberg-Rot */
---c-secondary:      #4A5D4E;   /* Weinlaub-Grün */
---c-bg:             #FDF8F7;   /* Rosé-Weiß */
---c-bg-2:           #F5EFEC;
---c-bg-3:           #ECE6E2;
---c-ink:            #2D2D2D;   /* Schiefergrau */
---c-ink-soft:       #6B6663;
---c-ink-mute:       #9A9590;
---c-line:           #E2DAD4;
---c-line-soft:      #EDE6E1;
---c-card:           #FFFFFF;
---c-accent-tint:    #F4E4E5;
---c-secondary-tint: #E8EAE5;
-
-/* Typography */
---f-display: "Fraunces", Georgia, serif;
---f-head:    "Montserrat", system-ui, sans-serif;
---f-body:    "Inter", system-ui, sans-serif;
---f-mono:    "JetBrains Mono", ui-monospace, monospace;
-
-/* Spacing scale (4px base) */
---s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
---s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px;
-
-/* Shape */
---radius: 6px; --radius-lg: 14px; --maxw: 1280px;
+--c-primary:   #8B1D28;   /* Kappelberg-Rot */
+--c-secondary: #4A5D4E;   /* Weinlaub-Grün */
+--c-bg:        #FDF8F7;
+--c-ink:       #2D2D2D;
+--f-display:   "Fraunces", Georgia, serif;
+--f-body:      "Inter", system-ui, sans-serif;
 ```
 
-**Rule: Always use CSS custom properties for brand values. Never hardcode hex colors or spacing numbers inside component `.tsx` files.** Hardcoded values belong only in `globals.css`.
+**Rule:** Always use CSS custom properties for brand values. Never hardcode hex colors in `.tsx` files.
 
-**Tailwind 4** is used only for coarse structural utilities on outermost wrappers: `min-h-screen`, `flex`, `flex-col`, `min-h-full`, `h-full`, `antialiased`. Not used for component-level colors, typography, or spacing.
+**Tailwind 4** is used only for coarse structural utilities on outermost wrappers: `min-h-screen`, `flex`, `flex-col`, `min-h-full`, `h-full`, `antialiased`. Not used for colors, typography, or component-level spacing.
 
-**Inline `style` prop** used sparingly for one-off numeric values that don't warrant a class (e.g., `style={{ marginTop: 32 }}`, `style={{ scrollMarginTop: 80 }}`). Minimize use.
+**Inline `style` prop** used sparingly for one-off numeric adjustments (`scrollMarginTop: 80`, `marginTop: 14`). Minimize new use.
+
+**Hover pattern for links** (established): `transition: color .15s` with `var(--c-secondary)` as hover color.
 
 **Responsive breakpoints** in `globals.css`:
 - Tablet: `@media (max-width: 960px)`
 - Mobile: `@media (max-width: 768px)`
 - Small mobile: `@media (max-width: 600px)`
 
-Link hover interactions use `transition: color .15s` with `var(--c-secondary)` as hover color — established pattern for `.contact-strip a:hover` and `.content-block a:hover`.
+## Sanity Schema Conventions
 
-## Import Organization
+**All schemas use `defineType` and `defineField`** from `'sanity'` — never plain objects.
 
-**Path aliases:** `@/` maps to `./src/` (defined in `fewog-app/tsconfig.json`).
-- Cross-directory imports use `@/`: `import { Nav } from '@/components/nav'`
-- Same-directory imports use `./`: `import { Icon } from './icons'`
+**German field titles:** Every `title` and `description` in schema definitions is in German. Non-negotiable for client usability.
 
-**Import order pattern (observed, not enforced):**
-1. React hooks: `import { useState, useEffect, useMemo, useRef } from 'react'`
-2. Third-party libraries: `import { motion, animate } from 'framer-motion'`
-3. Next.js: `import { useRouter } from 'next/navigation'`
-4. Internal components via `@/`
-5. Internal lib/data via `@/`
-6. Type-only imports last with `import type`
+**Field groups:** All schemas with multiple fields use `groups: [...]` to organize the Studio UI. New fields must be assigned to an appropriate `group`.
 
-**Quote style:** Single quotes for imports in component and page files. `layout.tsx` uses double quotes (Next.js scaffold default, inconsistency to fix).
-
-## File Organization
-
-```
-fewog-app/src/
-├── app/
-│   ├── globals.css              # Entire design system — tokens, classes, responsive
-│   ├── layout.tsx               # Root layout: font loading, html/body setup
-│   ├── page.tsx                 # Homepage — 'use client', hero + service dock
-│   ├── wohnen/page.tsx          # Property A-Z list with detail panel
-│   ├── ueberuns/page.tsx        # About page — content-block sections
-│   ├── aktuelles/page.tsx       # News/updates page
-│   ├── impressum/page.tsx       # Legal notice
-│   ├── datenschutz/page.tsx     # Privacy policy
-│   └── service/
-│       ├── page.tsx             # Services overview
-│       ├── mietermagazin-archiv/page.tsx
-│       └── geschaeftsbericht-archiv/page.tsx
-├── components/                  # Shared UI — all 'use client'
-│   ├── contact-strip.tsx
-│   ├── footer.tsx
-│   ├── icons.tsx                # Icon namespace object
-│   ├── nav.tsx                  # Navigation with mobile dropdown
-│   └── service-tile.tsx
-└── lib/
-    └── data.ts                  # FEWOG_DATA static dataset + TypeScript interfaces
+**Validation parameter name:** Both `rule` and `r` appear — use `r` as it is the newer convention in recent schemas:
+```typescript
+validation: (r) => r.required()
+validation: (r) => r.required().min(1990).max(2100)
 ```
 
-**No barrel exports.** Components imported directly by file path.
+**Preview blocks:** Every schema defines `preview` with `select` and `prepare()`. Singleton-style schemas (datenschutz, impressum) use `prepare() { return { title: '...' } }`.
 
-**Page-scoped static data** (archive lists) defined as module-level `const ARCHIV = [...]` at the top of the page file that uses it — not in `lib/`.
+**Image fields:** Always include `options: { hotspot: true }`.
 
-**Where to add new code:**
-- New page: `src/app/<slug>/page.tsx` with `'use client'` and the nav state pattern
-- New shared component: `src/components/<kebab-name>.tsx`
-- New data types or static data: `src/lib/data.ts`
-- New global styles: append to `src/app/globals.css` with a section comment
+**Singleton documents** (einstellungen, datenschutz, impressum): Fixed document IDs configured in `sanity.config.ts` via `S.document().schemaType(...).documentId(...)` — prevents duplicate document creation in Studio.
 
-## Naming
+## Where to Add New Code
+
+**New page:**
+1. Create `src/app/<slug>/page.tsx` — async server component, `sanityFetch`, pass props, render `<SanityLive />`
+2. Create `src/app/<slug>/[slug]-client.tsx` — `'use client'`, receive props, own nav state, render layout
+
+**New shared component:** `src/components/<kebab-name>.tsx` with named export.
+
+**New Sanity schema:** `src/sanity/schemaTypes/<name>.ts`, export as `[name]Schema`, register in `src/sanity/schemaTypes/index.ts`.
+
+**New Sanity query + type:** Append to `src/sanity/queries.ts` — query string constant + co-located TypeScript type.
+
+**New global styles:** Append to `src/app/globals.css` with a section comment header.
+
+**New static data / interfaces:** Append to `src/lib/data.ts`.
+
+## Naming Summary
 
 | Category | Convention | Examples |
 |----------|-----------|---------|
-| React components (shared) | PascalCase | `Nav`, `Footer`, `ServiceTile`, `ContactStrip` |
-| Page default exports | PascalCase + `Page` suffix | `WohnenPage`, `UeberUnsPage`, `ServicePage` (homepage exception: `Home`) |
+| React components (shared) | PascalCase named export | `Nav`, `Footer`, `ServiceTile`, `ContactStrip` |
+| Page server components | PascalCase default export + `Page` suffix | `WohnenPage`, `DatenschutzPage` |
+| Page client components | PascalCase default export + `Client` suffix | `WohnenClient`, `HomeClient`, `DatenschutzClient` |
 | Prop interfaces | PascalCase + `Props` suffix | `NavProps`, `ServiceTileProps` |
-| Domain model interfaces | PascalCase | `Property`, `District`, `FewogData` |
-| Module-level constants | SCREAMING_SNAKE_CASE | `FEWOG_DATA`, `NAV_LINKS`, `ARCHIV`, `EASE`, `DUR` |
-| Local variables / state | camelCase | `selectedProperty`, `districtById`, `grouped`, `filtered` |
+| Sanity schema exports | camelCase + `Schema` suffix | `liegenschaftSchema`, `einstellungenSchema` |
+| Query type exports | PascalCase + `Data` suffix | `KontaktData`, `StartseiteData`, `ServiceseiteData` |
+| Module-level constants | SCREAMING_SNAKE_CASE | `FEWOG_DATA`, `NAV_LINKS`, `DEFAULT_TILES`, `EASE` |
+| Local variables / state | camelCase | `selected`, `grouped`, `fallbackImageUrl` |
 | File names | lowercase kebab-case | `service-tile.tsx`, `contact-strip.tsx` |
 | CSS classes | lowercase kebab-case | `.bestand-row`, `.nav-link`, `.hero-lead` |
 | Route segments | lowercase German slugs | `/wohnen`, `/ueberuns`, `/aktuelles` |
 
 ## Comments
 
-File-level header comments identify the module:
-```ts
-// FEWOG Fellbach — Icons
-// Tiny icons (line, monoline, no slop)
+**Section dividers in long files** use em-dash pattern:
+```typescript
+// ── Kontakt ──────────────────────────────────────────────────────────────
+// ── Startseite ───────────────────────────────────────────────────────────
+```
+This appears in `src/sanity/schemaTypes/einstellungen.ts` and `src/sanity/queries.ts`.
+
+**Inline technical notes** explain non-obvious decisions:
+```typescript
+// stega deaktiviert für statische Metadaten (verhindert unsichtbare Zeichen in meta tags)
+// eslint-disable-line react-hooks/exhaustive-deps
 ```
 
-JSX section dividers mark major layout blocks:
-```tsx
-{/* Hero Section */}
-{/* Service Dock */}
-{/* Detail Panel */}
-```
+**JSX section dividers** mark major layout blocks: `{/* Property List */}`, `{/* Detail Panel */}`.
 
-No JSDoc annotations are used.
+No JSDoc or TSDoc annotations are used anywhere.
 
-## Linting
+## Error Handling
 
-ESLint 9 with flat config at `fewog-app/eslint.config.mjs`. Uses `FlatCompat` to bridge legacy `next/core-web-vitals` and `next/typescript` presets. No custom rules added. Run with `npm run lint` (calls `eslint` with no arguments, so it uses the config's defaults).
+**No error boundaries.** No `error.tsx` or `not-found.tsx` files in `src/app/`. Server errors propagate to Next.js default behavior and Vercel logs.
 
-No Prettier config file detected — code formatting is not enforced by tooling.
+**Data null-safety:** All Sanity data is defensively nullable via `?? fallback` pattern. Arrays default to `[]` via `data ?? []` in server components.
 
-## Notes
+## Logging
 
-- **Mixed navigation approaches:** Both `router.push()` and `window.location.href` assignments appear in `nav.tsx` and `page.tsx`. Standardize on `router.push()`.
-- **No Sanity wired yet:** `next-sanity`, `sanity`, `@portabletext/react`, and `@sanity/image-url` are installed but no client/schema/studio exists in `src/`. All content is static data.
-- **Placeholder metadata:** `layout.tsx` still has `title: "Create Next App"` — update before production.
-- **Unsplash placeholder image** in homepage hero — will be replaced by Sanity CDN asset.
-- **`framer-motion` v12** installed. Used only in `nav.tsx` (mobile dropdown) and `wohnen/page.tsx` (detail panel). Do not use declarative `animate` props — imperative `useMotionValue` + `animate()` is the established pattern.
+No logging framework. No `console.log` calls in source files. Server-side diagnostics rely on Vercel function logs.
+
+## Known Inconsistencies
+
+- `layout.tsx` still has placeholder metadata: `title: "Create Next App"` and `lang="en"` — both need updating before production
+- `layout.tsx` uses double quotes (Next.js scaffold default); all other files use single quotes
+- Both `router.push()` and `window.location.href` assignment appear in navigation code — `router.push()` is preferred; `window.location.href` should be phased out
 
 ---
 
-*Convention analysis: 2026-05-19*
+*Convention analysis: 2026-05-21*

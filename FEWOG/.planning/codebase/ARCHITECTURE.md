@@ -1,36 +1,44 @@
-<!-- refreshed: 2026-05-19 -->
+<!-- refreshed: 2026-05-21 -->
 # Architecture
 
-**Analysis Date:** 2026-05-19
+**Analysis Date:** 2026-05-21
 
 ## System Overview
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                    Browser (User)                            │
-│              React 19 + Framer Motion + CSS                  │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ HTTP
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Next.js 15 App Router (Vercel)                  │
-│         `fewog-app/src/app/`  — all pages 'use client'       │
-│  layout.tsx → page.tsx (per route) → shared components       │
-└──────────┬───────────────────────────────────────────────────┘
-           │ Static data import (no CMS yet)
-           ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Local Data Layer                                   │
-│           `fewog-app/src/lib/data.ts`                        │
-│           Hardcoded TypeScript objects (FEWOG_DATA)          │
-└─────────────────────────────────────────────────────────────┘
-
-Future (planned, packages installed but not wired up):
-┌─────────────────────────────────────────────────────────────┐
-│           Sanity Studio (not yet integrated)                 │
-│           sanity, next-sanity, @sanity/image-url installed   │
-│           No schemas, no sanity.config.ts, no /studio route  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      Browser (User)                             │
+│          React 19 + Framer Motion + @portabletext/react         │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │ HTTP
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│            Next.js 15 App Router (Vercel)                       │
+│  Server Components (async page.tsx) fetch from Sanity           │
+│  Client Components (*-client.tsx) handle UI + interactivity     │
+│  `fewog-app/src/app/`                                           │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Sanity Live Layer  (`fewog-app/src/sanity/live.ts`)     │   │
+│  │  defineLive → sanityFetch + SanityLive component         │   │
+│  │  Real-time content updates pushed via GROQ Events        │   │
+│  └──────────────────────────┬──────────────────────────────┘   │
+└─────────────────────────────┼───────────────────────────────────┘
+                              │ GROQ API (next-sanity)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│            Sanity Content Lake (Free Tier)                      │
+│            Project ID: uat139ly · Dataset: production           │
+│  Schemas: liegenschaft, neuigkeit, einstellungen,               │
+│           dokument, datenschutz, impressum                      │
+└─────────────────────────────────────────────────────────────────┘
+                              │ embedded at /studio
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│            Sanity Studio (embedded, German UI)                  │
+│            `fewog-app/src/app/studio/[[...tool]]/page.tsx`      │
+│            Accessed by staff at /studio                         │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Responsibilities
@@ -38,101 +46,171 @@ Future (planned, packages installed but not wired up):
 | Component | Responsibility | File |
 |-----------|----------------|------|
 | `RootLayout` | HTML shell, font loading, global CSS | `fewog-app/src/app/layout.tsx` |
-| `Home` | Landing page: hero, service dock, contact strip | `fewog-app/src/app/page.tsx` |
-| `WohnenPage` | Property A-Z list + animated detail panel | `fewog-app/src/app/wohnen/page.tsx` |
-| `ServicePage` | Static content: Mietertreff, publications, rentals | `fewog-app/src/app/service/page.tsx` |
-| `UeberUnsPage` | Static content: history, governance, Satzung | `fewog-app/src/app/ueberuns/page.tsx` |
-| `AktuellesPage` | Static content: notices, waiting list, METRONA | `fewog-app/src/app/aktuelles/page.tsx` |
-| `MietermagazinArchivPage` | Archive list of annual tenant magazines as PDFs | `fewog-app/src/app/service/mietermagazin-archiv/page.tsx` |
-| `GeschaeftsberichtArchivPage` | Archive list of annual reports as PDFs | `fewog-app/src/app/service/geschaeftsbericht-archiv/page.tsx` |
-| `ImpressumPage` | Legal imprint (§5 TMG) | `fewog-app/src/app/impressum/page.tsx` |
-| `DatenschutzPage` | DSGVO privacy statement | `fewog-app/src/app/datenschutz/page.tsx` |
-| `Nav` | Sticky top nav, desktop links + mobile burger dropdown | `fewog-app/src/components/nav.tsx` |
+| `Home` (RSC) | Fetches `kontaktQuery` + `startseiteQuery`, mounts SanityLive | `fewog-app/src/app/page.tsx` |
+| `HomeClient` | Landing page UI: hero (with Sanity image), service dock, contact strip | `fewog-app/src/app/home-client.tsx` |
+| `WohnenPage` (RSC) | Fetches `liegenschaftenQuery` + `einstellungenQuery` (placeholder image) | `fewog-app/src/app/wohnen/page.tsx` |
+| `WohnenClient` | Property A-Z list + animated slide-in detail panel | `fewog-app/src/app/wohnen/wohnen-client.tsx` |
+| `ServicePage` (RSC) | Fetches latest Mietermagazin, Geschäftsbericht, service content | `fewog-app/src/app/service/page.tsx` |
+| `ServiceClient` | Service offerings, Mietertreff, downloads, rich text sections | `fewog-app/src/app/service/service-client.tsx` |
+| `UeberUnsPage` (RSC) | Fetches `organeQuery` + `ueberunsseiteQuery` | `fewog-app/src/app/ueberuns/page.tsx` |
+| `UeberUnsClient` | History, governance (Vorstand/Aufsichtsrat), Satzung | `fewog-app/src/app/ueberuns/ueberuns-client.tsx` |
+| `AktuellesPage` (RSC) | Fetches `neuigkeitenQuery` + `aktuellesInfoQuery` | `fewog-app/src/app/aktuelles/page.tsx` |
+| `AktuellesClient` | News list with dates + static info blocks | `fewog-app/src/app/aktuelles/aktuelles-client.tsx` |
+| `NeuigkeitPage` (RSC) | Fetches single article by slug, calls `notFound()` on miss | `fewog-app/src/app/aktuelles/[slug]/page.tsx` |
+| `ArticleClient` | Article detail: hero image + PortableText body | `fewog-app/src/app/aktuelles/[slug]/article-client.tsx` |
+| `MietermagazinArchivPage` (RSC) | Fetches all `dokument` records by category | `fewog-app/src/app/service/mietermagazin-archiv/page.tsx` |
+| `GeschaeftsberichtArchivPage` (RSC) | Same pattern, geschaeftsbericht category | `fewog-app/src/app/service/geschaeftsbericht-archiv/page.tsx` |
+| `ArchivClient` | Shared PDF archive list UI (reused by both archive pages) | `fewog-app/src/app/service/archiv-client.tsx` |
+| `ImpressumPage` (RSC) | Fetches `impressumQuery` (singleton by fixed document ID) | `fewog-app/src/app/impressum/page.tsx` |
+| `ImpressumClient` | Renders Impressum content via PortableText | `fewog-app/src/app/impressum/impressum-client.tsx` |
+| `DatenschutzPage` (RSC) | Fetches `datenschutzQuery` (singleton by fixed document ID) | `fewog-app/src/app/datenschutz/page.tsx` |
+| `DatenschutzClient` | Renders Datenschutzerklärung via PortableText | `fewog-app/src/app/datenschutz/datenschutz-client.tsx` |
+| `StudioPage` | Embeds NextStudio; protected by `robots: noindex` layout | `fewog-app/src/app/studio/[[...tool]]/page.tsx` |
+| `Nav` | Sticky top nav, desktop + mobile burger dropdown | `fewog-app/src/components/nav.tsx` |
 | `Footer` | Copyright bar + Impressum/Datenschutz links | `fewog-app/src/components/footer.tsx` |
-| `ContactStrip` | 3-column office hours / phone / address strip | `fewog-app/src/components/contact-strip.tsx` |
+| `ContactStrip` | 3-column office hours / phone / address — accepts `KontaktData` prop | `fewog-app/src/components/contact-strip.tsx` |
 | `ServiceTile` | Clickable card: icon + title + description | `fewog-app/src/components/service-tile.tsx` |
-| `Icon` | Named SVG icon collection (no external icon lib) | `fewog-app/src/components/icons.tsx` |
-| `FEWOG_DATA` | All property, district, and meta data (static TS) | `fewog-app/src/lib/data.ts` |
+| `Icon` | Named inline SVG icon collection | `fewog-app/src/components/icons.tsx` |
 
 ## Pattern Overview
 
-**Overall:** Multi-page client-rendered React app inside Next.js App Router shell. All pages are marked `'use client'` and rendered entirely in the browser. There is no server-side data fetching and no Sanity CMS integration yet despite packages being installed.
+**Overall:** RSC + Client Component split pattern. All `page.tsx` files are async React Server Components that fetch from Sanity using `sanityFetch`. They hand data down as props to co-located `*-client.tsx` files which are `'use client'` components handling interactivity and UI rendering. `<SanityLive />` is mounted in every page's RSC return to enable real-time content updates.
 
 **Key Characteristics:**
-- Every `page.tsx` file uses `'use client'` at the top — no RSC (React Server Components) in use
-- All content is hardcoded: either in `FEWOG_DATA` (property data) or directly as JSX strings in page files
-- Navigation active state is managed via local `useState('page-name')` in each page — not derived from the URL router
-- Framer Motion used for animation on two specific interactions: mobile nav dropdown and property detail panel slide-in/swipe
+- RSC pages are the data-fetching layer; client components are the render layer
+- `sanityFetch` (from `defineLive`) is used on every page — no manual `fetch()` calls, no ISR tags
+- `<SanityLive />` is mounted at the RSC level (outside the client component) on every route
+- Fallback values are defined in each client component (hardcoded defaults) when Sanity data is null
+- Images use `urlFor()` from `fewog-app/src/sanity/image.ts` building Sanity CDN URLs; rendered as plain `<img>` tags (not `next/image`)
+- Portable Text rendered via `<PortableText>` from `@portabletext/react` in client components
+- Security headers applied to all routes except `/studio` via `next.config.ts`
 
 ## Layers
 
-**App Layer (Pages):**
-- Purpose: Route-level UI composition. Each page owns its full layout including Nav and Footer.
-- Location: `fewog-app/src/app/`
-- Contains: `page.tsx` per route, root `layout.tsx`, `globals.css`
-- Depends on: components, lib/data
-- Used by: Next.js router
+**RSC Page Layer:**
+- Purpose: Server-side data fetching from Sanity + mounting SanityLive for live updates
+- Location: `fewog-app/src/app/*/page.tsx`
+- Contains: `async function` components, `sanityFetch` calls (often parallel via `Promise.all`), `<SanityLive />` mount
+- Depends on: `fewog-app/src/sanity/live.ts`, `fewog-app/src/sanity/queries.ts`
+- Used by: Next.js App Router
 
-**Component Layer:**
-- Purpose: Reusable UI building blocks shared across pages
+**Client Component Layer:**
+- Purpose: UI composition, interactivity, state management
+- Location: `fewog-app/src/app/*-client.tsx` and `fewog-app/src/app/*/[slug]/*-client.tsx`
+- Contains: `'use client'` components receiving typed props from RSC pages, PortableText rendering, fallback content
+- Depends on: `fewog-app/src/components/`, `fewog-app/src/sanity/image.ts`, `@portabletext/react`
+- Used by: RSC page files
+
+**Shared Component Layer:**
+- Purpose: Reusable UI building blocks shared across multiple pages
 - Location: `fewog-app/src/components/`
 - Contains: Nav, Footer, ContactStrip, ServiceTile, Icon
-- Depends on: lib/data (Nav indirectly via router)
-- Used by: all page files
+- Depends on: `fewog-app/src/sanity/queries.ts` (ContactStrip uses `KontaktData` type)
+- Used by: all client component files
 
-**Data Layer:**
-- Purpose: Single source of truth for all property data, district definitions, and org meta stats
+**Sanity Integration Layer:**
+- Purpose: Abstracts all Sanity SDK setup — client creation, live fetching, image URL building, GROQ queries, TypeScript types
+- Location: `fewog-app/src/sanity/`
+- Contains: `client.ts`, `env.ts`, `live.ts`, `image.ts`, `queries.ts`, `schemaTypes/`
+- Depends on: `next-sanity`, `@sanity/image-url`, environment variables
+- Used by: RSC pages (queries, live), client components (image URLs, types)
+
+**CMS Schema Layer:**
+- Purpose: Defines the Sanity document types and Studio configuration
+- Location: `fewog-app/src/sanity/schemaTypes/`, `fewog-app/sanity.config.ts`
+- Contains: 6 schemas (liegenschaft, neuigkeit, einstellungen, dokument, datenschutz, impressum)
+- Depends on: `sanity` SDK
+- Used by: Sanity Studio at runtime via `fewog-app/sanity.config.ts`
+
+**Static Data Layer:**
+- Purpose: Fallback/seed property data and TypeScript interfaces
 - Location: `fewog-app/src/lib/data.ts`
-- Contains: TypeScript interfaces (`Property`, `District`, `FewogData`) + `FEWOG_DATA` constant
+- Contains: `FEWOG_DATA` constant (50 properties, 3 districts, org stats), `Property`/`District`/`FewogData` interfaces
 - Depends on: nothing
-- Used by: `fewog-app/src/app/page.tsx` (home), `fewog-app/src/app/wohnen/page.tsx`
+- Used by: `home-client.tsx` (stats fallback), `wohnen-client.tsx` (partially superseded by Sanity)
 
 ## Data Flow
 
-### Primary Request Path (All Routes)
+### Primary Request Path (Content Pages)
 
-1. Next.js serves pre-rendered HTML from Vercel edge (`fewog-app/src/app/[route]/page.tsx`)
-2. React hydrates client-side (`'use client'` directive on every page)
-3. Property data imported directly from `fewog-app/src/lib/data.ts` — no fetch, no API call
-4. UI rendered from static data constant
+1. Browser requests a route (e.g., `/wohnen`)
+2. Next.js App Router invokes the RSC `page.tsx` on the server (`fewog-app/src/app/wohnen/page.tsx`)
+3. `sanityFetch({ query: liegenschaftenQuery })` calls Sanity Content Lake via `next-sanity` (GROQ API)
+4. Data returned as typed objects; RSC renders `<WohnenClient liegenschaften={...} />` + `<SanityLive />`
+5. HTML streamed to browser; React hydrates the client component
+6. `<SanityLive />` establishes a live connection — future Sanity publishes push updates without page reload
 
-### Property Detail Flow (Wohnen page)
+### Sanity Singleton Pattern (Einstellungen)
 
-1. User lands on `/wohnen` — `WohnenPage` renders full property list from `FEWOG_DATA.properties`
-2. Properties sorted alphabetically via `useMemo` + `Array.sort` with German locale (`'de'`)
-3. Properties grouped by first letter of street name via second `useMemo`
-4. User clicks a row → `setSelectedProperty(prop)` triggers detail panel mount
-5. `useLayoutEffect` fires: `framer-motion/animate` slides panel in from off-screen right (x: offscreen → 0, 320ms)
-6. On mobile: `useEffect` attaches non-passive `touchmove` listener to detect horizontal swipe direction
-7. Swipe right > 80px triggers panel close with slide-out animation; smaller swipe springs back to 0
+The `einstellungen` document is a singleton referenced by fixed document ID `seiteneinstellungen` in the Studio structure. Multiple queries extract different slices of it:
+- `kontaktQuery` → contact strip on home page
+- `startseiteQuery` → hero image, hero text, service tiles on home page
+- `organeQuery` → Vorstand/Aufsichtsrat on Über uns
+- `serviceseiteQuery` → Mietertreff + rich text on Service page
+- `ueberunsseiteQuery` → Historie/Entwicklung rich text on Über uns
+- `aktuellesInfoQuery` → info blocks on Aktuelles page
+- `einstellungenQuery` → placeholder image for Wohnen page
 
-### Mobile Navigation Flow
+### Legal Page Pattern (Datenschutz + Impressum)
 
-1. Burger button click → `setOpen(true)` in `Nav` component (`fewog-app/src/components/nav.tsx`)
-2. `AnimatePresence` + `motion.div` animates dropdown: `height: 0 → 'auto'`, `opacity: 0 → 1`, 220ms
-3. Nav link click → `router.push('/route')` from `next/navigation`
+1. RSC fetches `datenschutzQuery` / `impressumQuery` — queries fixed document IDs (`datenschutzerklaerung`, `impressum`)
+2. `data.inhalt` (Portable Text array) passed as prop to client component
+3. Client renders `<PortableText value={inhalt} />` — or falls back to hardcoded `DEFAULT_INHALT` if Sanity data is null
+4. `<SanityLive />` mounts for real-time updates
+
+### News Article Flow (Dynamic Route)
+
+1. Browser requests `/aktuelles/[slug]`
+2. RSC `NeuigkeitPage` awaits `params` (Next.js 15 async params), calls `sanityFetch` with slug
+3. If no article found: `notFound()` triggers Next.js 404 response
+4. `ArticleClient` receives `NeuigkeitDetail`; renders header, `urlFor(titelbild)` image, PortableText body
+5. In-body images in PortableText rendered via custom `ptComponents.types.image` handler using `urlFor`
+
+### Hero Image Flow
+
+1. `startseiteQuery` includes `heroBild` field from `einstellungen` singleton
+2. `HomeClient` calls `urlFor(startseite.heroBild).width(1200).height(800).fit('crop').url()`
+3. Result URL (Sanity CDN) used as `<img src>`. Falls back to Unsplash placeholder if no Sanity image set.
 
 **State Management:**
-- No global state. Each page holds its own `useState` for active nav key and selected property.
-- Nav active state is manually initialized per page: `useState('wohnen')` in WohnenPage, `useState('service')` in ServicePage, etc.
+- No global state. Each client component holds its own `useState`.
+- Nav active key passed as prop from parent client components; still uses per-page `useState('pageName')` pattern (not derived from URL).
 - No context, no Zustand, no Redux.
 
 ## Key Abstractions
 
-**FEWOG_DATA:**
-- Purpose: Central data store for all 50 properties, 3 districts, and org statistics
-- Location: `fewog-app/src/lib/data.ts`
-- Pattern: Single exported constant of type `FewogData`; TypeScript interfaces `Property`, `District`, `FewogData` define the shape
+**`sanityFetch` + `SanityLive` (defineLive):**
+- Purpose: Unified data fetching that supports both initial SSR load and real-time updates
+- Setup: `fewog-app/src/sanity/live.ts`
+- Usage: `const { data } = await sanityFetch({ query, params? })` in RSC; `<SanityLive />` in JSX
+- Note: `stega: false` on the base client prevents stega encoding leaking into meta tags
 
-**Icon object:**
-- Purpose: Named SVG icon components — avoids external icon library dependency
-- Location: `fewog-app/src/components/icons.tsx`
-- Pattern: `Icon.wrench`, `Icon.doc`, `Icon.burger`, etc. — all are arrow functions returning inline SVGs
+**`urlFor(source)`:**
+- Purpose: Build Sanity CDN image URLs with transform parameters
+- Setup: `fewog-app/src/sanity/image.ts` (wraps `@sanity/image-url`)
+- Usage: `urlFor(imageField).width(N).height(N).fit('crop').url()`
+- Used in: `home-client.tsx`, `wohnen-client.tsx`, `article-client.tsx`, `wohnen/page.tsx`
 
-**Content blocks:**
-- Purpose: Standardized card container for content-heavy pages (Service, Über uns, Aktuelles)
-- Location: CSS class `.content-block` in `fewog-app/src/app/globals.css`
-- Pattern: `<div className="content-block">` with `h2`, `h3`, `p`, `a.btn` children — used consistently across all static pages
+**GROQ Queries + TypeScript types (co-located):**
+- Purpose: Single source of truth for what data each page needs and its shape
+- Location: `fewog-app/src/sanity/queries.ts`
+- Pattern: Each query string is exported alongside its result TypeScript type (e.g., `kontaktQuery` + `KontaktData`)
+
+**Singleton documents (fixed document IDs):**
+- `einstellungen` → document ID `seiteneinstellungen` (all site settings, contact, page content)
+- `datenschutz` → document ID `datenschutzerklaerung`
+- `impressum` → document ID `impressum`
+- Studio structure enforces these via `S.document().schemaType(...).documentId(...)` in `sanity.config.ts`
+
+**`ArchivClient` (shared archive UI):**
+- Purpose: Reusable PDF list component used by both archive sub-pages
+- Location: `fewog-app/src/app/service/archiv-client.tsx`
+- Pattern: Accepts `titel`, `lead`, `rubriktitel`, `navPage`, `dokumente` props — same component, different data
+
+**Fallback content pattern:**
+- All client components define `DEFAULT_*` constants (or inline fallbacks) for when Sanity returns null
+- Pattern: `const value = sanityData?.field ?? DEFAULT_VALUE`
+- Ensures pages render meaningfully during Sanity outage or before content is authored
 
 ## Entry Points
 
@@ -140,69 +218,80 @@ Future (planned, packages installed but not wired up):
 - Location: `fewog-app/src/app/layout.tsx`
 - Triggers: Every page render
 - Responsibilities: Loads Geist fonts via `next/font/google`, applies `globals.css`, sets HTML shell
+- Known issue: `lang="en"` should be `lang="de"` (WCAG 2.1 AA SC 3.1.1 violation)
 
-**Home Page:**
+**Home Page (RSC):**
 - Location: `fewog-app/src/app/page.tsx`
 - Triggers: Route `/`
-- Responsibilities: Hero section, service dock, contact strip, footer composition
+- Responsibilities: Parallel fetch of kontakt + startseite data; hands to HomeClient
 
-**Wohnen Page:**
+**Wohnen Page (RSC):**
 - Location: `fewog-app/src/app/wohnen/page.tsx`
 - Triggers: Route `/wohnen`
-- Responsibilities: Property list with alphabetical grouping and animated detail panel — most complex page in the codebase (~208 lines)
+- Responsibilities: Parallel fetch of all liegenschaften + placeholder image from einstellungen
+
+**Studio:**
+- Location: `fewog-app/src/app/studio/[[...tool]]/page.tsx`
+- Triggers: Route `/studio` (all sub-paths)
+- Responsibilities: Renders full Sanity Studio UI via `NextStudio`; noindex/nofollow enforced in `fewog-app/src/app/studio/layout.tsx`
 
 ## Architectural Constraints
 
-- **Rendering model:** All pages are client-side rendered (`'use client'`). Next.js App Router SSR/RSC features are not used. No `generateMetadata`, no streaming, no server actions.
-- **No CMS integration:** Sanity packages (`sanity`, `next-sanity`, `@sanity/image-url`, `@portabletext/react`, `@sanity/locale-de-de`) are installed in `package.json` but no `sanity.config.ts`, no schema files, no `/studio` route, and no `SanityLive` or `defineLive` usage exists anywhere in the codebase.
-- **Global state:** None. State is local to each page component.
+- **Rendering model:** RSC pages (`async function`) fetch data; client components (`'use client'`) render UI. `<SanityLive />` always mounted at RSC level, never inside client components.
+- **Sanity packages transpiled:** `next.config.ts` includes `transpilePackages` for `sanity`, `@sanity/ui`, `@sanity/icons`, `@sanity/vision`, `next-sanity` — required for App Router compatibility.
+- **useEffectEvent polyfill:** Custom webpack loader in `next.config.ts` patches React's `useEffectEvent` in both the Next.js compiled React bundle and `node_modules/react` to fix Sanity 5.x + Next.js 15.5.x incompatibility. See `fewog-app/src/lib/use-effect-event-loader.cjs`.
+- **Security headers:** Applied to all routes except `/studio` (which needs frames for preview). Headers: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `X-DNS-Prefetch-Control`.
+- **Images:** All Sanity images built with `urlFor()` and rendered as plain `<img>` tags. `remotePatterns` in `next.config.ts` allows `cdn.sanity.io`. `next/image` is not used.
+- **No dynamic `[slug]` routes except:** `/aktuelles/[slug]` for individual news articles.
+- **Global state:** None. Per-component `useState` only.
 - **Circular imports:** None detected.
 - **Threading:** Single-threaded browser JS. No web workers.
-- **Fonts:** Geist and Geist Mono loaded via `next/font/google` in `layout.tsx`. Additional fonts referenced in CSS design system (`Fraunces`, `Montserrat`, `Inter`, `JetBrains Mono`) at lines 21–24 of `globals.css` are NOT loaded via `next/font` — they fall through to system font fallbacks at runtime.
-- **Images:** All images use plain `<img>` tags with absolute external URLs (Unsplash placeholder on home page, fewog.de CDN for properties). `next/image` is not used. No `remotePatterns` configured in `next.config.ts`.
+- **Studio security:** Studio route excluded from X-Frame-Options to allow Sanity preview iframe. Studio layout sets `robots: { index: false, follow: false }`.
 
 ## Anti-Patterns
 
 ### Active nav state via per-page useState
 
-**What happens:** Each page initializes `const [page, setPage] = useState('pageName')` and passes it to `<Nav page={page} setPage={setPage} />`.
-**Why it's wrong:** Active state is redundant — `usePathname()` from `next/navigation` already exposes the current route. The pattern duplicates routing knowledge into component props and causes inconsistency (datenschutz/impressum use `useState('')`).
-**Do this instead:** Derive active nav key from `usePathname()` inside `Nav` itself. Remove the `page`/`setPage` props from all page files.
+**What happens:** Each client component initializes `const [page, setPage] = useState('pageName')` and passes it to `<Nav page={page} setPage={setPage} />`.
+**Why it's wrong:** Active state is redundant — `usePathname()` from `next/navigation` already exposes the current route. Creates inconsistency (datenschutz/impressum use `useState('')`).
+**Do this instead:** Derive active nav key from `usePathname()` inside `Nav` itself. Remove the `page`/`setPage` props from all client component files.
 
-### Hardcoded content in JSX
+### Plain `<img>` tags for all images
 
-**What happens:** All page content (history text, office hours, PDF links, contact details, archive lists) is written directly as JSX strings in page files such as `fewog-app/src/app/service/page.tsx` and `fewog-app/src/app/ueberuns/page.tsx`.
-**Why it's wrong:** Content cannot be updated without a code deploy. This contradicts the project's core value: "Genossenschaftsvorstand kann alle Inhalte selbstständig und ohne Programmierkenntnisse pflegen."
-**Do this instead:** Migrate content to Sanity CMS using the planned `defineLive` + `SanityLive` integration. Create schemas for page content, documents/downloads, and news.
+**What happens:** `urlFor(image).width(N).height(N).url()` strings fed into `<img src>` in `home-client.tsx`, `wohnen-client.tsx`, `article-client.tsx`.
+**Why it's wrong:** No lazy loading, no WebP fallback, no responsive `srcset`, no layout shift prevention from Next.js image optimization.
+**Do this instead:** Use `next/image` with `remotePatterns` already configured for `cdn.sanity.io` in `next.config.ts`. Or use the `next-sanity/image` loader.
 
-### lang="en" on German-language site
+### lang="en" on a German-language site
 
-**What happens:** `<html lang="en">` is set in `fewog-app/src/app/layout.tsx` line 26.
-**Why it's wrong:** Screen readers and browser translation features announce the page as English. Violates WCAG 2.1 AA Success Criterion 3.1.1.
-**Do this instead:** Change to `<html lang="de">` in `fewog-app/src/app/layout.tsx`.
+**What happens:** `<html lang="en">` in `fewog-app/src/app/layout.tsx` line 27.
+**Why it's wrong:** Screen readers announce the page as English. Violates WCAG 2.1 AA SC 3.1.1.
+**Do this instead:** Change to `<html lang="de">`.
 
-### Missing next/image
+### Hardcoded metadata in layout.tsx
 
-**What happens:** All images use plain `<img>` tags with absolute external URLs in `fewog-app/src/app/page.tsx` and `fewog-app/src/app/wohnen/page.tsx`.
-**Why it's wrong:** No optimization (no WebP conversion, no lazy loading, no layout shift prevention, no responsive `srcset`). The fewog.de CDN URLs become obsolete once images migrate to Sanity.
-**Do this instead:** Use `next/image` with `remotePatterns` in `next.config.ts`, or use the `next-sanity/image` loader once Sanity is integrated.
+**What happens:** `metadata.title = "Create Next App"` and `metadata.description = "Generated by create next app"` in `fewog-app/src/app/layout.tsx` lines 15–18.
+**Why it's wrong:** Wrong title and description served to all pages, all crawlers, all social shares.
+**Do this instead:** Replace with FEWOG-specific values; add per-page `generateMetadata` for `/aktuelles/[slug]` articles.
 
 ## Error Handling
 
-**Strategy:** None. There is no error handling in the application.
+**Strategy:** Minimal. `notFound()` is called in `fewog-app/src/app/aktuelles/[slug]/page.tsx` for missing articles. No other explicit error handling exists.
 
 **Patterns:**
-- No `try/catch` blocks (no async operations exist)
+- `notFound()` from `next/navigation` on missing Sanity document (articles only)
+- Null coalescing (`?? fallback`) for all Sanity data fields in client components
 - No `error.tsx` boundary route defined
-- No `not-found.tsx` route defined
-- No loading states
+- No `loading.tsx` route defined
+- No `try/catch` around `sanityFetch` calls
 
 ## Cross-Cutting Concerns
 
 **Logging:** None.
 **Validation:** None. No forms exist yet.
-**Authentication:** None. The site is entirely public.
+**Authentication:** None. The site is entirely public. Studio itself has no additional auth layer beyond Sanity's own identity system.
+**Rich text rendering:** `@portabletext/react` `<PortableText>` used in `datenschutz-client.tsx`, `impressum-client.tsx`, `article-client.tsx`, and service/ueberuns/aktuelles clients for Sanity block content fields.
 
 ---
 
-*Architecture analysis: 2026-05-19*
+*Architecture analysis: 2026-05-21*
