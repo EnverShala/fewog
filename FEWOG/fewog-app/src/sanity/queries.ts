@@ -131,3 +131,77 @@ export type Liegenschaft = {
   verfuegbar: boolean | null
   titelbild: { _type: 'image'; asset: { _ref: string; _type: 'reference' }; hotspot?: object } | null
 }
+
+// ── Startseite ──────────────────────────────────────────────────────────────
+
+export const startseiteQuery = `
+  *[_type == "einstellungen"][0] {
+    heroTitel,
+    heroUntertitel,
+    heroLead,
+    heroCtaText,
+    statsWohneinheiten,
+    statsMitglieder,
+    serviceDockEyebrow,
+    serviceDockTitel,
+    serviceDockLead,
+    serviceTiles[] { _key, titel, beschreibung, link }
+  }
+`
+
+export type StartseiteData = {
+  heroTitel: string | null
+  heroUntertitel: string | null
+  heroLead: string | null
+  heroCtaText: string | null
+  statsWohneinheiten: number | null
+  statsMitglieder: number | null
+  serviceDockEyebrow: string | null
+  serviceDockTitel: string | null
+  serviceDockLead: string | null
+  serviceTiles: { _key: string; titel: string; beschreibung: string | null; link: string | null }[] | null
+}
+
+// ── Service-Seite ────────────────────────────────────────────────────────────
+
+export const serviceseiteQuery = `
+  *[_type == "einstellungen"][0] {
+    mietertreffBeschreibung,
+    mietertreffOrte[] { _key, adresse, details },
+    ferienwohnungenInhalt,
+    veranstaltungsraumInhalt
+  }
+`
+
+export type ServiceseiteData = {
+  mietertreffBeschreibung: string | null
+  mietertreffOrte: { _key: string; adresse: string; details: string | null }[] | null
+  ferienwohnungenInhalt: unknown[] | null
+  veranstaltungsraumInhalt: unknown[] | null
+}
+
+// ── Über uns ─────────────────────────────────────────────────────────────────
+
+export const ueberunsseiteQuery = `
+  *[_type == "einstellungen"][0] {
+    historieInhalt,
+    entwicklungInhalt
+  }
+`
+
+export type UeberunsseiteData = {
+  historieInhalt: unknown[] | null
+  entwicklungInhalt: unknown[] | null
+}
+
+// ── Aktuelles-Seite ──────────────────────────────────────────────────────────
+
+export const aktuellesInfoQuery = `
+  *[_type == "einstellungen"][0] {
+    aktuellesInfoBloecke[] { _key, titel, inhalt }
+  }
+`
+
+export type AktuellesInfoData = {
+  aktuellesInfoBloecke: { _key: string; titel: string; inhalt: unknown[] | null }[] | null
+}

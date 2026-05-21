@@ -1,18 +1,49 @@
 'use client';
 
 import { useState } from 'react';
+import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
-import type { OrganeData } from '@/sanity/queries';
+import type { OrganeData, UeberunsseiteData } from '@/sanity/queries';
 
 const SATZUNG_FALLBACK = 'https://www.fewog.de/fileadmin/PDF/satzung/FEWOG_Satzung_2024.pdf';
 
-export default function UeberUnsClient({ organe }: { organe: OrganeData | null }) {
+const DEFAULT_HISTORIE: unknown[] = [
+  { _type: 'block', _key: 'h1', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG wurde am 9. September 1948 gegründet. Gründungsmitglieder waren der Bürgermeister und Initiator Dr. Max Graser und weitere zwölf Genossen.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'h2', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Der genossenschaftliche Geist und die Fürsorge um das Wohl der Menschen bestimmte nicht nur in den Anfangsjahren das Handeln der Wohnungsbaugenossenschaft. In den ersten sieben Jahren seit der Entstehung konnten 600 Wohnungen erstellt und der damals dringende Wunsch nach einer eigenen Wohnung befriedigt werden.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'h3', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Der genossenschaftliche Ansatz erwies sich hierbei sehr schnell als tragfähig. Im Jahr 2023 konnte die FEWOG auf eine 75-jährige Entwicklung zurückblicken.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'h4', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG ist eine Vermietungsgenossenschaft und derzeit der größte unabhängige Wohnungsanbieter in der Stadt Fellbach.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'h5', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Unser Dienstleistungsschwerpunkt liegt in der Bewirtschaftung unseres eigenen Bestandes an Mietwohnungen in Fellbach und in der Verwaltung von Mietwohnungen für Eigentümer.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'h6', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG besteht aus rund 1.200 Mitgliedern.', marks: [] }], markDefs: [] },
+];
+
+const DEFAULT_ENTWICKLUNG: unknown[] = [
+  { _type: 'block', _key: 'e1', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Kernaufgabe der Genossenschaft ist die Wohnungsversorgung unserer Mitglieder mit bezahlbarem Wohnraum sowie die Erhaltung sozial stabiler Bewohnerstrukturen.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'e2', style: 'h3', children: [{ _type: 'span', _key: 's1', text: 'Strategie FEWOG 2025', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'e3', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Grundsätzliches Ziel ist es, den Wohnungsbestand, die Gebäude, technischen Anlagen, Außenanlagen sowie Grundstücksflächen in ihrem Wert und ihrer Substanz zu erhalten.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'e4', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Als genossenschaftlicher Wohnungsanbieter sehen wir den demografischen Wandel der Gesellschaft als Chance und Herausforderung, bei einer überproportional wachsenden älteren Bevölkerung den steigenden Bedarf an seniorengerechtem und bezahlbarem Wohnraum bereitzustellen.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'e5', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Wir wollen Wohnungen jedem Alter gerecht für neue Mitglieder und Bestandsmieter in unseren Quartieren anbieten.', marks: [] }], markDefs: [] },
+];
+
+export default function UeberUnsClient({
+  organe,
+  ueberunsseite,
+}: {
+  organe: OrganeData | null
+  ueberunsseite: UeberunsseiteData | null
+}) {
   const [page, setPage] = useState('ueberuns');
 
   const vorstand = organe?.vorstandMitglieder ?? [];
   const aufsichtsrat = organe?.aufsichtsratMitglieder ?? [];
   const satzungUrl = organe?.satzungPdfUrl ?? SATZUNG_FALLBACK;
+
+  const historieInhalt = ueberunsseite?.historieInhalt?.length
+    ? ueberunsseite.historieInhalt
+    : DEFAULT_HISTORIE;
+  const entwicklungInhalt = ueberunsseite?.entwicklungInhalt?.length
+    ? ueberunsseite.entwicklungInhalt
+    : DEFAULT_ENTWICKLUNG;
 
   return (
     <div className="min-h-screen">
@@ -30,21 +61,12 @@ export default function UeberUnsClient({ organe }: { organe: OrganeData | null }
           <div className="content-block">
             <h2>Historie</h2>
             <h3>Über 75 Jahre FEWOG in Fellbach</h3>
-            <p>Die FEWOG wurde am 9. September 1948 gegründet. Gründungsmitglieder waren der Bürgermeister und Initiator Dr. Max Graser und weitere zwölf Genossen.</p>
-            <p>Der genossenschaftliche Geist und die Fürsorge um das Wohl der Menschen bestimmte nicht nur in den Anfangsjahren das Handeln der Wohnungsbaugenossenschaft. In den ersten sieben Jahren seit der Entstehung konnten 600 Wohnungen erstellt und der damals dringende Wunsch nach einer eigenen Wohnung befriedigt werden.</p>
-            <p>Der genossenschaftliche Ansatz erwies sich hierbei sehr schnell als tragfähig. Im Jahr 2023 konnte die FEWOG auf eine 75-jährige Entwicklung zurückblicken.</p>
-            <p>Die FEWOG ist eine Vermietungsgenossenschaft und derzeit der größte unabhängige Wohnungsanbieter in der Stadt Fellbach.</p>
-            <p>Unser Dienstleistungsschwerpunkt liegt in der Bewirtschaftung unseres eigenen Bestandes an Mietwohnungen in Fellbach und in der Verwaltung von Mietwohnungen für Eigentümer.</p>
-            <p>Die FEWOG besteht aus rund 1.200 Mitgliedern.</p>
+            <PortableText value={historieInhalt as Parameters<typeof PortableText>[0]['value']} />
           </div>
 
           <div className="content-block">
             <h2>Entwicklung</h2>
-            <p>Kernaufgabe der Genossenschaft ist die Wohnungsversorgung unserer Mitglieder mit bezahlbarem Wohnraum sowie die Erhaltung sozial stabiler Bewohnerstrukturen.</p>
-            <h3>Strategie FEWOG 2025</h3>
-            <p>Grundsätzliches Ziel ist es, den Wohnungsbestand, die Gebäude, technischen Anlagen, Außenanlagen sowie Grundstücksflächen in ihrem Wert und ihrer Substanz zu erhalten.</p>
-            <p>Als genossenschaftlicher Wohnungsanbieter sehen wir den demografischen Wandel der Gesellschaft als Chance und Herausforderung, bei einer überproportional wachsenden älteren Bevölkerung den steigenden Bedarf an seniorengerechtem und bezahlbarem Wohnraum bereitzustellen.</p>
-            <p>Wir wollen Wohnungen jedem Alter gerecht für neue Mitglieder und Bestandsmieter in unseren Quartieren anbieten.</p>
+            <PortableText value={entwicklungInhalt as Parameters<typeof PortableText>[0]['value']} />
           </div>
 
           {/* Organe — aus Sanity */}

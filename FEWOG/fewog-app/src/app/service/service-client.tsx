@@ -1,21 +1,118 @@
 'use client';
 
 import { useState } from 'react';
+import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
-import type { Dokument } from '@/sanity/queries';
+import type { Dokument, ServiceseiteData } from '@/sanity/queries';
+
+const DEFAULT_MIETERTREFF_BESCHREIBUNG =
+  'Für alle Mieter und Mitglieder bieten wir einmal im Monat die Möglichkeit, sich bei unseren Mietertreffs auszutauschen. Hier können Sie über aktuelle Themen rund ums Haus sowie über das Leben und Wohnen bei und mit der FEWOG sprechen. Kommen Sie gerne vorbei, erzählen Sie, was Sie beschäftigt, erfahren Sie Neues und genießen Sie die Zeit mit netten Menschen.';
+
+const DEFAULT_MIETERTREFF_ORTE = [
+  {
+    _key: 'lessing',
+    adresse: 'Lessingstraße 2, 70734 Fellbach',
+    details: 'im 1. OG der FEWOG-Geschäftsstelle\njedem ersten Dienstag im Monat\nvon 15:00 bis 17:00 Uhr',
+  },
+  {
+    _key: 'garten',
+    adresse: 'Gartenstraße 84, 70734 Fellbach',
+    details: 'im Gemeinschaftsraum (1. OG)\njedem dritten Dienstag im Monat\nab 15:30 Uhr',
+  },
+];
+
+const DEFAULT_FERIENWOHNUNGEN: unknown[] = [
+  {
+    _type: 'block', _key: 'fw1', style: 'normal',
+    children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG vermietet zwei Ferienwohnungen in ihrem Geschäftsgebäude an Mieter, Mitglieder und Besucher von Fellbach.', marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'fw2', style: 'normal',
+    children: [
+      { _type: 'span', _key: 's1', text: 'Bei Fragen oder Interesse kontaktieren Sie uns bitte telefonisch unter ', marks: ['strong'] },
+      { _type: 'span', _key: 's2', text: '0711 578815-0', marks: ['strong'] },
+      { _type: 'span', _key: 's3', text: ' oder senden eine E-Mail an ', marks: ['strong'] },
+      { _type: 'span', _key: 's4', text: 'info@fewog.de', marks: ['strong'] },
+      { _type: 'span', _key: 's5', text: '.', marks: ['strong'] },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'fw3', style: 'h4',
+    children: [{ _type: 'span', _key: 's1', text: '2-Zimmer Ferienwohnung', marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'fw4', style: 'normal',
+    children: [{ _type: 'span', _key: 's1', text: '2-Zimmerwohnung mit 43 m² im 1. OG der Lessingstraße 2 in 70734 Fellbach, bestehend aus Wohnzimmer mit Schlafcouch, Schlafzimmer mit zwei Einzelbetten, Küche, Dusche/WC, Balkon und TV.', marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'fw5', style: 'normal',
+    children: [{ _type: 'span', _key: 's1', text: 'Nutzungsgebühren: 60,00 € für 1 bis 3 Personen pro Nacht · 55,00 € Endreinigung (einmalig)', marks: [] }],
+    markDefs: [],
+  },
+];
+
+const DEFAULT_VERANSTALTUNGSRAUM: unknown[] = [
+  {
+    _type: 'block', _key: 'vr1', style: 'h4',
+    children: [{ _type: 'span', _key: 's1', text: 'Sie suchen eine passende Räumlichkeit für:', marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'vr2', style: 'normal',
+    children: [{ _type: 'span', _key: 's1', text: 'Seminare · Workshops · Tagungen · Schulungen · WEG-Versammlungen', marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'vr3', style: 'normal',
+    children: [
+      { _type: 'span', _key: 's1', text: 'Der ', marks: [] },
+      { _type: 'span', _key: 's2', text: 'Gemeinschaftsraum in der Gartenstraße 84', marks: ['strong'] },
+      { _type: 'span', _key: 's3', text: ' (1. OG) eignet sich für Veranstaltungen bis ca. 24 Personen. ', marks: [] },
+      { _type: 'span', _key: 's4', text: 'Bestuhlung, Tische und Küche zur Eigennutzung sind vorhanden.', marks: ['strong'] },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: 'block', _key: 'vr4', style: 'normal',
+    children: [
+      { _type: 'span', _key: 's1', text: 'Unser ', marks: [] },
+      { _type: 'span', _key: 's2', text: 'Veranstaltungsraum in der Lessingstraße 2', marks: ['strong'] },
+      { _type: 'span', _key: 's3', text: ' (1. OG) bietet Platz für bis zu 35 Personen. ', marks: [] },
+      { _type: 'span', _key: 's4', text: 'Bestuhlung, Tische und Küche zur Eigennutzung sind vorhanden.', marks: ['strong'] },
+    ],
+    markDefs: [],
+  },
+];
 
 export default function ServiceClient({
   mietermagazin,
   geschaeftsbericht,
+  serviceseite,
 }: {
   mietermagazin: Dokument | null
   geschaeftsbericht: Dokument | null
+  serviceseite: ServiceseiteData | null
 }) {
   const [page, setPage] = useState('service');
 
   const mmUrl = mietermagazin?.dateiUrl ?? mietermagazin?.dateiAssetUrl;
   const gbUrl = geschaeftsbericht?.dateiUrl ?? geschaeftsbericht?.dateiAssetUrl;
+
+  const mietertreffBeschreibung = serviceseite?.mietertreffBeschreibung ?? DEFAULT_MIETERTREFF_BESCHREIBUNG;
+  const mietertreffOrte = serviceseite?.mietertreffOrte?.length
+    ? serviceseite.mietertreffOrte
+    : DEFAULT_MIETERTREFF_ORTE;
+  const ferienwohnungenInhalt = serviceseite?.ferienwohnungenInhalt?.length
+    ? serviceseite.ferienwohnungenInhalt
+    : DEFAULT_FERIENWOHNUNGEN;
+  const veranstaltungsraumInhalt = serviceseite?.veranstaltungsraumInhalt?.length
+    ? serviceseite.veranstaltungsraumInhalt
+    : DEFAULT_VERANSTALTUNGSRAUM;
 
   return (
     <div className="min-h-screen">
@@ -34,26 +131,22 @@ export default function ServiceClient({
           <div id="mietertreff" className="content-block" style={{ scrollMarginTop: 80 }}>
             <h2>Mietertreff</h2>
             <h3>Raum für Gespräche und Miteinander</h3>
-            <p>
-              Für alle Mieter und Mitglieder bieten wir einmal im Monat die Möglichkeit, sich bei unseren Mietertreffs auszutauschen. Hier können Sie über aktuelle Themen rund ums Haus sowie über das Leben und Wohnen bei und mit der FEWOG sprechen. Kommen Sie gerne vorbei, erzählen Sie, was Sie beschäftigt, erfahren Sie Neues und genießen Sie die Zeit mit netten Menschen.
-            </p>
-            <div className="info-box">
-              <h4>Die nächsten Mietertreffen:</h4>
-              <div className="info-grid">
-                <div>
-                  <strong>Lessingstraße 2, 70734 Fellbach</strong><br />
-                  im 1. OG der FEWOG-Geschäftsstelle<br />
-                  jeden ersten Dienstag im Monat<br />
-                  von 15:00 bis 17:00 Uhr
-                </div>
-                <div>
-                  <strong>Gartenstraße 84, 70734 Fellbach</strong><br />
-                  im Gemeinschaftsraum (1. OG)<br />
-                  jeden dritten Dienstag im Monat<br />
-                  ab 15:30 Uhr
+            <p>{mietertreffBeschreibung}</p>
+            {mietertreffOrte.length > 0 && (
+              <div className="info-box">
+                <h4>Die nächsten Mietertreffen:</h4>
+                <div className="info-grid">
+                  {mietertreffOrte.map((ort) => (
+                    <div key={ort._key}>
+                      <strong>{ort.adresse}</strong>
+                      {ort.details && ort.details.split('\n').map((line, i) => (
+                        <span key={i}><br />{line}</span>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Mietermagazin */}
@@ -105,45 +198,14 @@ export default function ServiceClient({
           <div className="content-block">
             <h2>Ferienwohnungen</h2>
             <h3>Wohnen auf Zeit bei der FEWOG</h3>
-            <p>
-              Die FEWOG vermietet zwei Ferienwohnungen in ihrem Geschäftsgebäude an Mieter, Mitglieder und Besucher von Fellbach.
-            </p>
-            <p>
-              <strong>Bei Fragen oder Interesse kontaktieren Sie uns bitte telefonisch unter der Nummer <a href="tel:+4971157881500">0711 578815-0</a> oder senden eine E-Mail an <a href="mailto:info@fewog.de">info@fewog.de</a>.</strong>
-            </p>
-            <p>
-              Die Nutzungsbedingungen zu unseren Ferienwohnungen finden Sie <a href="https://www.fewog.de/fileadmin/PDF/_Nutzungsbedingungen_Ferienwohnung.pdf" target="_blank" rel="noopener noreferrer">hier</a>.
-            </p>
-            <h4>2-Zimmer Ferienwohnung</h4>
-            <p>
-              2-Zimmerwohnung mit 43 m² im 1. OG der Lessingstraße 2 in 70734 Fellbach, bestehend aus Wohnzimmer mit Schlafcouch, Schlafzimmer mit zwei Einzelbetten, Küche, Dusche/WC, Balkon und TV.
-            </p>
-            <p>Bettwäsche, Hand- und Geschirrtücher werden nicht gestellt.</p>
-            <p><strong>Nutzungsgebühren:</strong></p>
-            <p>
-              <strong>60,00 €</strong> für 1 bis 3 Person pro Nacht<br />
-              <strong>55,00 €</strong> für Endreinigung (einmalig)
-            </p>
+            <PortableText value={ferienwohnungenInhalt as Parameters<typeof PortableText>[0]['value']} />
           </div>
 
           {/* Veranstaltungsraum */}
           <div className="content-block">
             <h2>Veranstaltungsraum</h2>
             <h3>Anmietung von Räumlichkeiten</h3>
-            <h4>Sie suchen eine passende Räumlichkeit für:</h4>
-            <ul>
-              <li>Seminare</li>
-              <li>Workshops</li>
-              <li>Tagungen</li>
-              <li>Schulungen</li>
-              <li>WEG-Versammlungen</li>
-            </ul>
-            <p>
-              Der <strong>Gemeinschaftsraum in der Gartenstraße 84</strong> (1. OG) in 70734 Fellbach eignet sich für Veranstaltungen bis ca. 24 Personen. <strong>Bestuhlung, Tische und Küche zur Eigennutzung sind vorhanden.</strong>
-            </p>
-            <p>
-              Unser <strong>Veranstaltungsraum in der Lessingstraße 2</strong> (im 1. OG unserer Geschäftsstelle) in 70734 Fellbach bietet in ansprechendem Ambiente Platz für bis zu 35 Personen. <strong>Bestuhlung, Tische und Küche zur Eigennutzung sind vorhanden.</strong>
-            </p>
+            <PortableText value={veranstaltungsraumInhalt as Parameters<typeof PortableText>[0]['value']} />
           </div>
         </div>
       </section>
