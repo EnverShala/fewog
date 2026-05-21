@@ -14,7 +14,7 @@ const DEFAULT_HISTORIE: unknown[] = [
   { _type: 'block', _key: 'h3', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Der genossenschaftliche Ansatz erwies sich hierbei sehr schnell als tragfähig. Im Jahr 2023 konnte die FEWOG auf eine 75-jährige Entwicklung zurückblicken.', marks: [] }], markDefs: [] },
   { _type: 'block', _key: 'h4', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG ist eine Vermietungsgenossenschaft und derzeit der größte unabhängige Wohnungsanbieter in der Stadt Fellbach.', marks: [] }], markDefs: [] },
   { _type: 'block', _key: 'h5', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Unser Dienstleistungsschwerpunkt liegt in der Bewirtschaftung unseres eigenen Bestandes an Mietwohnungen in Fellbach und in der Verwaltung von Mietwohnungen für Eigentümer.', marks: [] }], markDefs: [] },
-  { _type: 'block', _key: 'h6', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG besteht aus rund 1.200 Mitgliedern.', marks: [] }], markDefs: [] },
+  { _type: 'block', _key: 'h6', style: 'normal', children: [{ _type: 'span', _key: 's1', text: 'Die FEWOG besteht aus rund 1.480 Mitgliedern.', marks: [] }], markDefs: [] },
 ];
 
 const DEFAULT_ENTWICKLUNG: unknown[] = [

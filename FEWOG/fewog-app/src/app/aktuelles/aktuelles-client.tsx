@@ -6,16 +6,8 @@ import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { urlFor } from '@/sanity/image';
+import { formatDate } from '@/lib/format';
 import type { Neuigkeit, AktuellesInfoData } from '@/sanity/queries';
-
-function formatDate(iso: string) {
-  const [year, month, day] = iso.split('-').map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString('de-DE', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
 
 const DEFAULT_INFO_BLOECKE = [
   {

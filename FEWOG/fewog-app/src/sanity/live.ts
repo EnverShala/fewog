@@ -6,5 +6,6 @@ const token = process.env.SANITY_API_READ_TOKEN
 export const { sanityFetch, SanityLive } = defineLive({
   client,
   serverToken: token,
-  browserToken: token,
+  // browserToken omitted intentionally — exposing the read token in the client
+  // bundle would allow anyone to read unpublished draft content via the API.
 })
