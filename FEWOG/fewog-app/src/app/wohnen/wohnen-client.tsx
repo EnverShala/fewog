@@ -75,7 +75,7 @@ export default function WohnenClient({
 
   const closePanel = async () => {
     entryAnim.current?.stop();
-    const anims: Promise<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
+    const anims: PromiseLike<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
     if (!isMobile()) anims.push(animate(wrapperW, 0, { duration: DUR, ease: EASE }));
     await Promise.all(anims);
     setSelected(null);
@@ -92,7 +92,7 @@ export default function WohnenClient({
   const onTouchEnd = async () => {
     if (isHorizontal.current !== true) return;
     if (dragDelta.current > 80) {
-      const anims: Promise<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
+      const anims: PromiseLike<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
       if (!isMobile()) anims.push(animate(wrapperW, 0, { duration: DUR, ease: EASE }));
       await Promise.all(anims);
       setSelected(null);
