@@ -205,3 +205,21 @@ export const aktuellesInfoQuery = `
 export type AktuellesInfoData = {
   aktuellesInfoBloecke: { _key: string; titel: string; inhalt: unknown[] | null }[] | null
 }
+
+// ── Datenschutz & Impressum ──────────────────────────────────────────────────
+
+export const datenschutzQuery = `
+  *[_type == "datenschutz" && _id == "datenschutzerklaerung"][0] {
+    inhalt
+  }
+`
+
+export const impressumQuery = `
+  *[_type == "impressum" && _id == "impressum"][0] {
+    inhalt
+  }
+`
+
+export type RechtsseiteData = {
+  inhalt: unknown[] | null
+}

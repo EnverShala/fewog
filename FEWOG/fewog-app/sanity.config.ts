@@ -25,8 +25,10 @@ export default defineConfig({
             S.listItem()
               .title('Neuigkeiten')
               .child(S.documentTypeList('neuigkeit').title('Alle Neuigkeiten')),
+            S.listItem()
+              .title('Dokumente')
+              .child(S.documentTypeList('dokument').title('Alle Dokumente')),
             S.divider(),
-            // Singleton: Einstellungen hat nur ein Dokument
             S.listItem()
               .title('Seiteneinstellungen')
               .child(
@@ -34,10 +36,24 @@ export default defineConfig({
                   .schemaType('einstellungen')
                   .documentId('seiteneinstellungen')
               ),
+            S.listItem()
+              .title('Datenschutzerklärung')
+              .child(
+                S.document()
+                  .schemaType('datenschutz')
+                  .documentId('datenschutzerklaerung')
+              ),
+            S.listItem()
+              .title('Impressum')
+              .child(
+                S.document()
+                  .schemaType('impressum')
+                  .documentId('impressum')
+              ),
           ]),
     }),
     media(),
-    visionTool(), // Hilfreich für GROQ-Abfragen während der Entwicklung
+    visionTool(),
     deDELocale(),
   ],
 
