@@ -401,7 +401,7 @@ a:hover { text-decoration: none; }
 .bestand-detail-wrapper {
   flex-shrink: 0;
   position: sticky;
-  top: 80px;
+  top: 96px;
 }
 .bestand-detail-col {
   width: 400px;
