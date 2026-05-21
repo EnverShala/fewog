@@ -136,6 +136,7 @@ export type Liegenschaft = {
 
 export const startseiteQuery = `
   *[_type == "einstellungen"][0] {
+    heroBild,
     heroTitel,
     heroUntertitel,
     heroLead,
@@ -150,6 +151,7 @@ export const startseiteQuery = `
 `
 
 export type StartseiteData = {
+  heroBild: { _type: 'image'; asset: { _ref: string; _type: 'reference' }; hotspot?: object } | null
   heroTitel: string | null
   heroUntertitel: string | null
   heroLead: string | null

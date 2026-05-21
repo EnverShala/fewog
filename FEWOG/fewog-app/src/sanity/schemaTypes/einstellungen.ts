@@ -118,6 +118,14 @@ export const einstellungenSchema = defineType({
 
     // ── Startseite ───────────────────────────────────────────────────────────
     defineField({
+      name: 'heroBild',
+      title: 'Hero-Bild (Startseite)',
+      description: 'Großes Foto im Hero-Bereich der Startseite',
+      type: 'image',
+      group: 'startseite',
+      options: { hotspot: true },
+    }),
+    defineField({
       name: 'heroTitel',
       title: 'Hero-Überschrift',
       type: 'string',

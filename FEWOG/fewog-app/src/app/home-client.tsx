@@ -7,6 +7,7 @@ import { ServiceTile } from '@/components/service-tile';
 import { ContactStrip } from '@/components/contact-strip';
 import { Icon } from '@/components/icons';
 import { FEWOG_DATA } from '@/lib/data';
+import { urlFor } from '@/sanity/image';
 import type { KontaktData, StartseiteData } from '@/sanity/queries';
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -117,7 +118,13 @@ export default function HomeClient({
             </div>
             <div style={{ position: 'relative' }}>
               <div className="hero-image">
-                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop" alt="Modernisierte FEWOG-Wohnanlage in Fellbach" />
+                <img
+                  src={startseite?.heroBild
+                    ? urlFor(startseite.heroBild).width(1200).height(800).fit('crop').url()
+                    : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop'
+                  }
+                  alt="FEWOG-Wohnanlage in Fellbach"
+                />
               </div>
             </div>
           </div>
