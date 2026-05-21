@@ -33,12 +33,14 @@ export default function WohnenClient({
   const isHorizontal = useRef<boolean | null>(null);
   const entryAnim    = useRef<ReturnType<typeof animate> | null>(null);
   const x            = useMotionValue(0);
+  const wrapperW     = useMotionValue(0);
 
   const offscreen = () =>
     panelRef.current?.offsetWidth ?? (typeof window !== 'undefined' ? window.innerWidth : 500);
 
   useLayoutEffect(() => {
     if (!selected) return;
+    wrapperW.set(400); // instant — no transition, so first-open matches switch-between-properties
     x.set(offscreen());
     const ctrl = animate(x, 0, { duration: DUR, ease: EASE });
     entryAnim.current = ctrl;
@@ -71,7 +73,10 @@ export default function WohnenClient({
 
   const closePanel = async () => {
     entryAnim.current?.stop();
-    await animate(x, offscreen(), { duration: DUR, ease: EASE });
+    await Promise.all([
+      animate(x, offscreen(), { duration: DUR, ease: EASE }),
+      animate(wrapperW, 0, { duration: DUR, ease: EASE }),
+    ]);
     setSelected(null);
   };
 
@@ -86,7 +91,10 @@ export default function WohnenClient({
   const onTouchEnd = async () => {
     if (isHorizontal.current !== true) return;
     if (dragDelta.current > 80) {
-      await animate(x, offscreen(), { duration: DUR, ease: EASE });
+      await Promise.all([
+        animate(x, offscreen(), { duration: DUR, ease: EASE }),
+        animate(wrapperW, 0, { duration: DUR, ease: EASE }),
+      ]);
       setSelected(null);
     } else {
       animate(x, 0, { duration: 0.2 });
@@ -161,8 +169,7 @@ export default function WohnenClient({
             {/* Detail Panel — wrapper always mounted, animates width so list shrinks without scale distortion */}
             <motion.div
               className="bestand-detail-wrapper"
-              animate={{ width: selected ? 400 : 0 }}
-              transition={{ duration: DUR, ease: EASE }}
+              style={{ width: wrapperW }}
             >
             {selected && (
               <motion.div
