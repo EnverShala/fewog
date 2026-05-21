@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useLayoutEffect, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, animate, useMotionValue } from 'framer-motion';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -23,7 +24,6 @@ export default function WohnenClient({
   liegenschaften: Liegenschaft[]
   fallbackImageUrl: string | null
 }) {
-  const [page, setPage] = useState('wohnen');
   const [selected, setSelected] = useState<Liegenschaft | null>(null);
 
   const panelRef     = useRef<HTMLDivElement>(null);
@@ -117,7 +117,7 @@ export default function WohnenClient({
 
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="page-head page-head-simple">
         <div className="wrap">
@@ -171,7 +171,7 @@ export default function WohnenClient({
                 <div className="property-detail-panel">
                   <div className="detail-hero">
                     {imageUrl(selected)
-                      ? <img src={imageUrl(selected)!} alt={selected.bezeichnung} />
+                      ? <Image src={imageUrl(selected)!} alt={selected.bezeichnung} width={600} height={400} style={{ width: '100%', height: 'auto' }} />
                       : <div className="detail-hero-placeholder" />
                     }
                     <div className="detail-hero-overlay">

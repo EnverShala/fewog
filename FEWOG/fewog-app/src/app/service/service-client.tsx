@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -98,8 +97,6 @@ export default function ServiceClient({
   geschaeftsbericht: Dokument | null
   serviceseite: ServiceseiteData | null
 }) {
-  const [page, setPage] = useState('service');
-
   const mmUrl = mietermagazin?.dateiUrl ?? mietermagazin?.dateiAssetUrl;
   const gbUrl = geschaeftsbericht?.dateiUrl ?? geschaeftsbericht?.dateiAssetUrl;
 
@@ -116,7 +113,7 @@ export default function ServiceClient({
 
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="page-head page-head-simple">
         <div className="wrap">

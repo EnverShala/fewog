@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -79,15 +79,13 @@ export default function AktuellesClient({
   neuigkeiten: Neuigkeit[]
   aktuellesInfo: AktuellesInfoData | null
 }) {
-  const [page, setPage] = useState('aktuelles');
-
   const infoBloecke = aktuellesInfo?.aktuellesInfoBloecke?.length
     ? aktuellesInfo.aktuellesInfoBloecke
     : DEFAULT_INFO_BLOECKE;
 
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="page-head page-head-simple">
         <div className="wrap">
@@ -107,9 +105,12 @@ export default function AktuellesClient({
                 <Link key={n._id} href={`/aktuelles/${n.slug.current}`} className="news-card">
                   <div className="news-card-img">
                     {n.titelbild && (
-                      <img
+                      <Image
                         src={urlFor(n.titelbild).width(640).height(360).fit('crop').url()}
                         alt={n.titel}
+                        width={640}
+                        height={360}
+                        style={{ width: '100%', height: 'auto' }}
                       />
                     )}
                   </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -32,12 +31,11 @@ const DEFAULT_INHALT: unknown[] = [
 ];
 
 export default function ImpressumClient({ data }: { data: RechtsseiteData | null }) {
-  const [page, setPage] = useState('');
   const inhalt = data?.inhalt?.length ? data.inhalt : DEFAULT_INHALT;
 
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="page-head page-head-simple">
         <div className="wrap">

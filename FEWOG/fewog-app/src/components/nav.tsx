@@ -2,61 +2,49 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Icon } from './icons';
 
-interface NavProps {
-  page: string;
-  setPage: (page: string) => void;
-}
-
-const NAV_LINKS: [string, string][] = [
-  ['start', 'Startseite'],
-  ['wohnen', 'Wohnen'],
-  ['service', 'Service'],
-  ['ueberuns', 'Über uns'],
-  ['aktuelles', 'Aktuelles'],
+const NAV_LINKS: [string, string, string][] = [
+  ['/', 'start', 'Startseite'],
+  ['/wohnen', 'wohnen', 'Wohnen'],
+  ['/service', 'service', 'Service'],
+  ['/ueberuns', 'ueberuns', 'Über uns'],
+  ['/aktuelles', 'aktuelles', 'Aktuelles'],
 ];
 
-export function Nav({ page, setPage }: NavProps) {
+export function Nav() {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const pathname = usePathname();
 
-  const go = (p: string) => {
-    setOpen(false);
-    if (p === 'start') {
-      router.push('/');
-    } else if (p === 'wohnen') {
-      router.push('/wohnen');
-    } else if (p === 'ueberuns') {
-      router.push('/ueberuns');
-    } else if (p === 'aktuelles') {
-      router.push('/aktuelles');
-    } else if (p === 'service') {
-      router.push('/service');
-    } else {
-      setPage(p);
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  };
+  // '/' only matches exactly; all others match as prefix (covers sub-routes like /aktuelles/[slug])
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
     <nav className="nav">
       <div className="nav-inner">
-        <div className="brand" onClick={() => go('start')}>
-          <img
-            src="https://www.fewog.de/fileadmin/pics/logo_fewog.png"
+        <Link href="/" className="brand">
+          <Image
+            src="/logo-fewog.png"
             alt="FEWOG Fellbach"
+            width={160}
+            height={48}
             style={{ height: 48, width: 'auto', display: 'block' }}
+            priority
           />
-        </div>
+        </Link>
         <div className="nav-links">
-          {NAV_LINKS.map(([k, l]) => (
-            <a key={k}
-               className={'nav-link' + (page === k ? ' active' : '')}
-               onClick={(e) => { e.preventDefault(); go(k); }}>
-              {l}
-            </a>
+          {NAV_LINKS.map(([href, key, label]) => (
+            <Link
+              key={key}
+              href={href}
+              className={'nav-link' + (isActive(href) ? ' active' : '')}
+            >
+              {label}
+            </Link>
           ))}
         </div>
         <button className="nav-burger" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -75,12 +63,15 @@ export function Nav({ page, setPage }: NavProps) {
             style={{ overflow: 'hidden' }}
           >
             <div className="nav-mobile-links">
-              {NAV_LINKS.map(([k, l]) => (
-                <a key={k}
-                   className={'nav-link' + (page === k ? ' active' : '')}
-                   onClick={(e) => { e.preventDefault(); go(k); }}>
-                  {l}
-                </a>
+              {NAV_LINKS.map(([href, key, label]) => (
+                <Link
+                  key={key}
+                  href={href}
+                  className={'nav-link' + (isActive(href) ? ' active' : '')}
+                  onClick={() => setOpen(false)}
+                >
+                  {label}
+                </Link>
               ))}
             </div>
           </motion.div>

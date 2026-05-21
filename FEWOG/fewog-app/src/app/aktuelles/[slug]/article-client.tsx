@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -13,9 +13,12 @@ const ptComponents = {
   types: {
     image: ({ value }: { value: { asset?: object; alt?: string } }) =>
       value.asset ? (
-        <img
+        <Image
           src={urlFor(value as Parameters<typeof urlFor>[0]).width(800).url()}
           alt={value.alt ?? ''}
+          width={800}
+          height={600}
+          style={{ width: '100%', height: 'auto' }}
           className="article-pt-img"
         />
       ) : null,
@@ -23,11 +26,9 @@ const ptComponents = {
 };
 
 export default function ArticleClient({ neuigkeit }: { neuigkeit: NeuigkeitDetail }) {
-  const [page, setPage] = useState('aktuelles');
-
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <div className="wrap">
         <Link href="/aktuelles" className="article-back">
@@ -46,9 +47,13 @@ export default function ArticleClient({ neuigkeit }: { neuigkeit: NeuigkeitDetai
         <div className="wrap">
           {neuigkeit.titelbild && (
             <div className="article-hero">
-              <img
+              <Image
                 src={urlFor(neuigkeit.titelbild).width(1200).height(500).fit('crop').url()}
                 alt={neuigkeit.titel}
+                width={1200}
+                height={500}
+                style={{ width: '100%', height: 'auto' }}
+                priority
               />
             </div>
           )}

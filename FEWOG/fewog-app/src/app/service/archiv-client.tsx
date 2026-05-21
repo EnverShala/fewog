@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import type { Dokument } from '@/sanity/queries';
@@ -9,20 +8,16 @@ export default function ArchivClient({
   titel,
   lead,
   rubriktitel,
-  navPage,
   dokumente,
 }: {
   titel: string
   lead: string
   rubriktitel: string
-  navPage: string
   dokumente: Dokument[]
 }) {
-  const [page, setPage] = useState(navPage);
-
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="page-head page-head-simple">
         <div className="wrap">

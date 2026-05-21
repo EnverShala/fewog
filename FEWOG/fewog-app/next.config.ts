@@ -22,6 +22,19 @@ const securityHeaders = [
     key: 'X-DNS-Prefetch-Control',
     value: 'on',
   },
+  {
+    key: 'Content-Security-Policy-Report-Only',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' https://cdn.sanity.io data: blob:",
+      "connect-src 'self' https://*.api.sanity.io https://*.sanity.io wss://*.sanity.io",
+      "font-src 'self'",
+      "frame-src 'none'",
+      "object-src 'none'",
+    ].join('; '),
+  },
 ]
 
 const nextConfig: NextConfig = {

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { PortableText } from '@portabletext/react';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
@@ -32,8 +31,6 @@ export default function UeberUnsClient({
   organe: OrganeData | null
   ueberunsseite: UeberunsseiteData | null
 }) {
-  const [page, setPage] = useState('ueberuns');
-
   const vorstand = organe?.vorstandMitglieder ?? [];
   const aufsichtsrat = organe?.aufsichtsratMitglieder ?? [];
   const satzungUrl = organe?.satzungPdfUrl ?? SATZUNG_FALLBACK;
@@ -47,7 +44,7 @@ export default function UeberUnsClient({
 
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="page-head page-head-simple">
         <div className="wrap">

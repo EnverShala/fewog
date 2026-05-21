@@ -14,7 +14,6 @@ export default async function GeschaeftsberichtArchivPage() {
         titel="GESCHÄFTSBERICHT ARCHIV"
         lead="Alle Geschäftsberichte der FEWOG zum Download"
         rubriktitel="Geschäftsbericht"
-        navPage="service"
         dokumente={dokumente ?? []}
       />
       <SanityLive />

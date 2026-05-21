@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Nav } from '@/components/nav';
 import { Footer } from '@/components/footer';
 import { ServiceTile } from '@/components/service-tile';
@@ -47,20 +48,7 @@ export default function HomeClient({
   kontakt: KontaktData | null
   startseite: StartseiteData | null
 }) {
-  const [page, setPage] = useState('start');
-
-  useEffect(() => {
-    if (page === 'wohnen') {
-      window.location.href = '/wohnen';
-    } else if (page === 'service') {
-      setPage('start');
-    } else if (page === 'ueberuns') {
-      setPage('start');
-    } else if (page === 'aktuelles') {
-      setPage('start');
-    }
-  }, [page]);
-
+  const router = useRouter();
   const heroTitel = startseite?.heroTitel ?? 'Genossenschaftliches Wohnen.';
   const heroUntertitel = startseite?.heroUntertitel ?? 'Wohnraum für Fellbach · seit 1948';
   const heroCtaText = startseite?.heroCtaText ?? 'Wohnungsbestand ansehen';
@@ -83,7 +71,7 @@ export default function HomeClient({
 
   return (
     <div className="min-h-screen">
-      <Nav page={page} setPage={setPage} />
+      <Nav />
 
       <section className="hero">
         <div className="wrap">
@@ -97,7 +85,7 @@ export default function HomeClient({
               </h1>
               <p className="hero-lead">{heroLead}</p>
               <div className="hero-ctas">
-                <button className="btn btn-primary btn-arrow" onClick={() => setPage('wohnen')}>
+                <button className="btn btn-primary btn-arrow" onClick={() => router.push('/wohnen')}>
                   {heroCtaText}
                 </button>
               </div>
@@ -118,13 +106,16 @@ export default function HomeClient({
             </div>
             <div style={{ position: 'relative' }}>
               <div className="hero-image">
-                <img
-                  src={startseite?.heroBild
-                    ? urlFor(startseite.heroBild).width(1200).height(800).fit('crop').url()
-                    : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80&auto=format&fit=crop'
-                  }
-                  alt="FEWOG-Wohnanlage in Fellbach"
-                />
+                {startseite?.heroBild && (
+                  <Image
+                    src={urlFor(startseite.heroBild).width(1200).height(800).fit('crop').url()}
+                    alt="FEWOG-Wohnanlage in Fellbach"
+                    width={1200}
+                    height={800}
+                    style={{ width: '100%', height: 'auto' }}
+                    priority
+                  />
+                )}
               </div>
             </div>
           </div>

@@ -14,7 +14,6 @@ export default async function MietermagazinArchivPage() {
         titel="MIETERMAGAZIN ARCHIV"
         lead="Alle Ausgaben des FEWOG-Mietermagazins zum Download"
         rubriktitel="FEWOG Mietermagazin"
-        navPage="service"
         dokumente={dokumente ?? []}
       />
       <SanityLive />
