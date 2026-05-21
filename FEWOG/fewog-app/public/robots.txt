@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sanity Studio nicht indexieren
+Disallow: /studio/
+Disallow: /studio
+
+Sitemap: https://fewog.de/sitemap.xml
