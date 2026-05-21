@@ -9,6 +9,7 @@ export const einstellungenSchema = defineType({
     { name: 'oeffnungszeiten', title: 'Öffnungszeiten' },
     { name: 'social', title: 'Social Media & Links' },
     { name: 'bilder', title: 'Bilder' },
+    { name: 'organe', title: 'Vorstand & Aufsichtsrat' },
   ],
   fields: [
     defineField({
@@ -58,6 +59,43 @@ export const einstellungenSchema = defineType({
       title: 'Bankverbindung (IBAN)',
       type: 'string',
       group: 'kontakt',
+    }),
+    defineField({
+      name: 'vorstandMitglieder',
+      title: 'Vorstandsmitglieder',
+      type: 'array',
+      group: 'organe',
+      of: [{
+        type: 'object',
+        name: 'person',
+        fields: [
+          defineField({ name: 'name', title: 'Name', type: 'string', validation: (r) => r.required() }),
+          defineField({ name: 'rolle', title: 'Funktion', type: 'string', description: 'z.B. „Geschäftsführende Vorständin"' }),
+        ],
+        preview: { select: { title: 'name', subtitle: 'rolle' } },
+      }],
+    }),
+    defineField({
+      name: 'aufsichtsratMitglieder',
+      title: 'Aufsichtsratsmitglieder',
+      type: 'array',
+      group: 'organe',
+      of: [{
+        type: 'object',
+        name: 'person',
+        fields: [
+          defineField({ name: 'name', title: 'Name', type: 'string', validation: (r) => r.required() }),
+          defineField({ name: 'rolle', title: 'Funktion', type: 'string', description: 'z.B. „Vorsitzender"' }),
+        ],
+        preview: { select: { title: 'name', subtitle: 'rolle' } },
+      }],
+    }),
+    defineField({
+      name: 'satzungPdfUrl',
+      title: 'Satzung PDF (URL)',
+      type: 'url',
+      group: 'organe',
+      description: 'Link zur aktuellen Satzung als PDF',
     }),
     defineField({
       name: 'platzhalterbild',

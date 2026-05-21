@@ -8,6 +8,46 @@ export type Einstellungen = {
   platzhalterbild: { _type: 'image'; asset: { _ref: string; _type: 'reference' } } | null
 }
 
+export const organeQuery = `
+  *[_type == "einstellungen"][0] {
+    vorstandMitglieder[] { _key, name, rolle },
+    aufsichtsratMitglieder[] { _key, name, rolle },
+    satzungPdfUrl
+  }
+`
+
+export type OrganeData = {
+  vorstandMitglieder: { _key: string; name: string; rolle: string | null }[] | null
+  aufsichtsratMitglieder: { _key: string; name: string; rolle: string | null }[] | null
+  satzungPdfUrl: string | null
+}
+
+export const aktuellMietermagazinQuery = `
+  *[_type == "dokument" && kategorie == "mietermagazin"] | order(jahr desc) [0] {
+    _id, titel, jahr, dateiUrl, "dateiAssetUrl": datei.asset->url
+  }
+`
+
+export const aktuellGeschaeftsberichtQuery = `
+  *[_type == "dokument" && kategorie == "geschaeftsbericht"] | order(jahr desc) [0] {
+    _id, titel, jahr, dateiUrl, "dateiAssetUrl": datei.asset->url
+  }
+`
+
+export const dokumenteByKategorieQuery = `
+  *[_type == "dokument" && kategorie == $kategorie] | order(jahr desc) {
+    _id, titel, jahr, dateiUrl, "dateiAssetUrl": datei.asset->url
+  }
+`
+
+export type Dokument = {
+  _id: string
+  titel: string
+  jahr: number
+  dateiUrl: string | null
+  dateiAssetUrl: string | null
+}
+
 type SanityImage = { _type: 'image'; asset: { _ref: string; _type: 'reference' }; hotspot?: object }
 
 export const neuigkeitenQuery = `
