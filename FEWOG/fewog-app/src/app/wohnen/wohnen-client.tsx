@@ -176,7 +176,29 @@ export default function WohnenClient({
                     }
                     <div className="detail-hero-overlay">
                       <div className="eyebrow">Hausdetails</div>
-                      <h3>{selected.bezeichnung}</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <h3 style={{ margin: 0 }}>{selected.bezeichnung}</h3>
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selected.bezeichnung + ', Fellbach')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="In Google Maps öffnen"
+                          onClick={e => e.stopPropagation()}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0, width: 28, height: 28,
+                            background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(4px)',
+                            borderRadius: '50%', color: '#fff',
+                            transition: 'background .15s',
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.32)')}
+                          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.18)')}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                          </svg>
+                        </a>
+                      </div>
                       <div className="detail-district">
                         {STADTTEIL_LABEL[selected.stadtteil ?? ''] ?? 'Fellbach'}
                       </div>
