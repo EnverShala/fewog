@@ -597,7 +597,7 @@ a:hover { text-decoration: none; }
   /* Detail-Panel: von rechts über die Liste schieben, unterhalb der Navbar */
   .bestand-detail-col {
     position: fixed;
-    top: 60px; left: 0; right: 0; bottom: 0;
+    top: 72px; left: 0; right: 0; bottom: 0;
     z-index: 100;
     overflow-y: auto;
     background: var(--c-bg);
@@ -605,7 +605,7 @@ a:hover { text-decoration: none; }
   }
   .property-detail-panel {
     border-radius: 0;
-    min-height: calc(100dvh - 60px);
+    min-height: calc(100dvh - 72px);
     box-shadow: none;
   }
 }
