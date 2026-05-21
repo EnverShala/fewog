@@ -40,7 +40,7 @@ export default function WohnenClient({
 
   useLayoutEffect(() => {
     if (!selected) return;
-    wrapperW.set(400); // instant — no transition, so first-open matches switch-between-properties
+    animate(wrapperW, 400, { duration: DUR, ease: EASE });
     x.set(offscreen());
     const ctrl = animate(x, 0, { duration: DUR, ease: EASE });
     entryAnim.current = ctrl;
