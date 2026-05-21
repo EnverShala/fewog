@@ -148,7 +148,7 @@ export default function WohnenClient({
                       <div
                         key={prop._id}
                         className={'bestand-row' + (selected?._id === prop._id ? ' selected' : '')}
-                        onClick={() => setSelected(selected?._id === prop._id ? null : prop)}
+                        onClick={() => { if (selected?._id === prop._id) void closePanel(); else setSelected(prop); }}
                       >
                         <div className="col-main">
                           <div className="prop-street">{prop.bezeichnung}</div>
