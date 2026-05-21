@@ -6,6 +6,7 @@ import { createClient } from '@sanity/client'
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import { Readable } from 'stream'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -71,8 +72,19 @@ async function run() {
 
     try {
       process.stdout.write(`  ↑ ${doc.bezeichnung} ... `)
-      const asset = await client.assets.upload('image', imageUrl, {
+      const res = await fetch(imageUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+          'Referer': 'https://www.fewog.de/',
+          'Accept': 'image/webp,image/apng,image/*,*/*',
+        },
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const buffer = Buffer.from(await res.arrayBuffer())
+      const stream = Readable.from(buffer)
+      const asset = await client.assets.upload('image', stream, {
         filename: toSlug(doc.bezeichnung) + '.jpg',
+        contentType: 'image/jpeg',
       })
       await client.patch(doc._id).set({
         titelbild: { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
