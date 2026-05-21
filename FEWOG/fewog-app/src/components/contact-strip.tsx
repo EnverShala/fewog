@@ -32,7 +32,7 @@ export function ContactStrip({ data }: { data?: KontaktData | null }) {
         <div className="val">
           {zeiten[0]?.tage} · {zeiten[0]?.zeiten}
           {zeiten.slice(1).map(z => (
-            <small key={z._key}>{z.tage} · {z.zeiten}</small>
+            <span key={z._key} style={{ display: 'block' }}>{z.tage} · {z.zeiten}</span>
           ))}
         </div>
       </div>
