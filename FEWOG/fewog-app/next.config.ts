@@ -25,7 +25,6 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['sanity', '@sanity/ui', '@sanity/icons', '@sanity/vision', 'next-sanity'],
   images: {
     remotePatterns: [
       {
@@ -43,14 +42,13 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  webpack: (config, { dir }) => {
-    // Next.js 15.5.x ships React 19.2.0-canary which is missing useEffectEvent.
-    // Sanity 5.x imports it from both the Next.js compiled React bundle AND
-    // the real node_modules/react package (ESM chunks). Patch both paths.
-    config.module.rules.unshift({
-      test: /(?:node_modules[/\\]react[/\\]cjs[/\\]|next[/\\]dist[/\\]compiled[/\\]react[/\\]cjs[/\\])react\.(development|production\.min)\.js$/,
-      loader: path.resolve(dir, 'src/lib/use-effect-event-loader.cjs'),
-    })
+  webpack: (config, { isServer, dir }) => {
+    if (!isServer) {
+      config.module.rules.unshift({
+        test: /next[/\\]dist[/\\]compiled[/\\]react[/\\]cjs[/\\]react\.(development|production)\.js$/,
+        loader: path.resolve(dir, 'src/lib/use-effect-event-loader.cjs'),
+      })
+    }
     return config
   },
 }
