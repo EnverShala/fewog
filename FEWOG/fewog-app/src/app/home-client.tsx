@@ -108,11 +108,10 @@ export default function HomeClient({
               <div className="hero-image">
                 {startseite?.heroBild && (
                   <Image
-                    src={urlFor(startseite.heroBild).width(1200).height(800).fit('crop').url()}
+                    src={urlFor(startseite.heroBild).width(1200).height(1500).fit('crop').url()}
                     alt="FEWOG-Wohnanlage in Fellbach"
-                    width={1200}
-                    height={800}
-                    style={{ width: '100%', height: 'auto' }}
+                    fill
+                    style={{ objectFit: 'cover' }}
                     priority
                   />
                 )}
