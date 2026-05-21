@@ -131,7 +131,7 @@ export default function WohnenClient({
           <div className={`bestand-layout${selected ? ' detail-open' : ''}`}>
 
             {/* Property List */}
-            <div className="bestand-list-col">
+            <motion.div className="bestand-list-col" layout transition={{ duration: DUR, ease: EASE }}>
               <div className="bestand-list">
                 {grouped.map(group => (
                   <div key={group.letter}>
@@ -156,7 +156,7 @@ export default function WohnenClient({
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Detail Panel */}
             {selected && (
