@@ -8,6 +8,24 @@ export type Einstellungen = {
   platzhalterbild: { _type: 'image'; asset: { _ref: string; _type: 'reference' } } | null
 }
 
+export const kontaktQuery = `
+  *[_type == "einstellungen"][0] {
+    telefon,
+    email,
+    strasse,
+    plzOrt,
+    oeffnungszeiten[] { _key, tage, zeiten }
+  }
+`
+
+export type KontaktData = {
+  telefon: string | null
+  email: string | null
+  strasse: string | null
+  plzOrt: string | null
+  oeffnungszeiten: { _key: string; tage: string; zeiten: string }[] | null
+}
+
 export const organeQuery = `
   *[_type == "einstellungen"][0] {
     vorstandMitglieder[] { _key, name, rolle },
