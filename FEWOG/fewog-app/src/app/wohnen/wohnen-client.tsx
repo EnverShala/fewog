@@ -38,9 +38,11 @@ export default function WohnenClient({
   const offscreen = () =>
     panelRef.current?.offsetWidth ?? (typeof window !== 'undefined' ? window.innerWidth : 500);
 
+  const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+
   useLayoutEffect(() => {
     if (!selected) return;
-    animate(wrapperW, 400, { duration: DUR, ease: EASE });
+    if (!isMobile()) animate(wrapperW, 400, { duration: DUR, ease: EASE });
     x.set(offscreen());
     const ctrl = animate(x, 0, { duration: DUR, ease: EASE });
     entryAnim.current = ctrl;
@@ -73,10 +75,9 @@ export default function WohnenClient({
 
   const closePanel = async () => {
     entryAnim.current?.stop();
-    await Promise.all([
-      animate(x, offscreen(), { duration: DUR, ease: EASE }),
-      animate(wrapperW, 0, { duration: DUR, ease: EASE }),
-    ]);
+    const anims: Promise<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
+    if (!isMobile()) anims.push(animate(wrapperW, 0, { duration: DUR, ease: EASE }));
+    await Promise.all(anims);
     setSelected(null);
   };
 
@@ -91,10 +92,9 @@ export default function WohnenClient({
   const onTouchEnd = async () => {
     if (isHorizontal.current !== true) return;
     if (dragDelta.current > 80) {
-      await Promise.all([
-        animate(x, offscreen(), { duration: DUR, ease: EASE }),
-        animate(wrapperW, 0, { duration: DUR, ease: EASE }),
-      ]);
+      const anims: Promise<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
+      if (!isMobile()) anims.push(animate(wrapperW, 0, { duration: DUR, ease: EASE }));
+      await Promise.all(anims);
       setSelected(null);
     } else {
       animate(x, 0, { duration: 0.2 });

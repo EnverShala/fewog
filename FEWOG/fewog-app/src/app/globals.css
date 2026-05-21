@@ -594,10 +594,10 @@ a:hover { text-decoration: none; }
   /* Bestand */
   .bestand { padding: 20px 0; }
 
-  /* Detail-Panel: von rechts über die Liste schieben */
+  /* Detail-Panel: von rechts über die Liste schieben, unterhalb der Navbar */
   .bestand-detail-col {
     position: fixed;
-    inset: 0;
+    top: 60px; left: 0; right: 0; bottom: 0;
     z-index: 100;
     overflow-y: auto;
     background: var(--c-bg);
@@ -605,7 +605,7 @@ a:hover { text-decoration: none; }
   }
   .property-detail-panel {
     border-radius: 0;
-    min-height: 100dvh;
+    min-height: calc(100dvh - 60px);
     box-shadow: none;
   }
 }
