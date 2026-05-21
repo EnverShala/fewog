@@ -398,11 +398,13 @@ a:hover { text-decoration: none; }
   flex: 1;
   min-width: 0;
 }
-.bestand-detail-col {
-  width: 400px;
+.bestand-detail-wrapper {
   flex-shrink: 0;
   position: sticky;
   top: 80px;
+}
+.bestand-detail-col {
+  width: 100%;
 }
 
 .property-detail-panel {
@@ -516,7 +518,6 @@ a:hover { text-decoration: none; }
   .overview-tile:last-child { border-bottom: 0; }
   .bestand-row { grid-template-columns: 1fr; }
   .col-district { display: none; }
-  .bestand-detail-col { width: 300px; }
   .property-detail-panel { flex-direction: column; }
 }
 

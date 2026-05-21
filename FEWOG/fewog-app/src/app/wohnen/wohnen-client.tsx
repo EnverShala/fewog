@@ -131,7 +131,7 @@ export default function WohnenClient({
           <div className={`bestand-layout${selected ? ' detail-open' : ''}`}>
 
             {/* Property List */}
-            <motion.div className="bestand-list-col" layout transition={{ duration: DUR, ease: EASE }}>
+            <div className="bestand-list-col">
               <div className="bestand-list">
                 {grouped.map(group => (
                   <div key={group.letter}>
@@ -156,9 +156,14 @@ export default function WohnenClient({
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
-            {/* Detail Panel */}
+            {/* Detail Panel — wrapper always mounted, animates width so list shrinks without scale distortion */}
+            <motion.div
+              className="bestand-detail-wrapper"
+              animate={{ width: selected ? 400 : 0 }}
+              transition={{ duration: DUR, ease: EASE }}
+            >
             {selected && (
               <motion.div
                 key={selected._id}
@@ -236,6 +241,7 @@ export default function WohnenClient({
                 </div>
               </motion.div>
             )}
+            </motion.div>
 
           </div>
         </div>
