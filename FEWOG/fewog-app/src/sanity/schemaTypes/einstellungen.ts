@@ -35,6 +35,12 @@ export const einstellungenSchema = defineType({
       group: 'kontakt',
     }),
     defineField({
+      name: 'fax',
+      title: 'Faxnummer',
+      type: 'string',
+      group: 'kontakt',
+    }),
+    defineField({
       name: 'email',
       title: 'E-Mail-Adresse',
       type: 'string',

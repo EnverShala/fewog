@@ -11,6 +11,7 @@ export type Einstellungen = {
 export const kontaktQuery = `
   *[_type == "einstellungen"][0] {
     telefon,
+    fax,
     email,
     strasse,
     plzOrt,
@@ -20,6 +21,7 @@ export const kontaktQuery = `
 
 export type KontaktData = {
   telefon: string | null
+  fax: string | null
   email: string | null
   strasse: string | null
   plzOrt: string | null

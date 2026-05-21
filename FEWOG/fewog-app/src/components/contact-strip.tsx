@@ -5,6 +5,7 @@ import type { KontaktData } from '@/sanity/queries';
 
 const FALLBACK: KontaktData = {
   telefon: '0711 578815-0',
+  fax: '0711 578815-90',
   email: 'info@fewog.de',
   strasse: 'Lessingstraße 2',
   plzOrt: '70734 Fellbach',
@@ -17,6 +18,7 @@ const FALLBACK: KontaktData = {
 export function ContactStrip({ data }: { data?: KontaktData | null }) {
   const d = data ?? FALLBACK;
   const telefon = d.telefon ?? FALLBACK.telefon!;
+  const fax = d.fax ?? FALLBACK.fax!;
   const email = d.email ?? FALLBACK.email!;
   const adresse = d.strasse && d.plzOrt
     ? `${d.strasse} · ${d.plzOrt}`
@@ -38,6 +40,7 @@ export function ContactStrip({ data }: { data?: KontaktData | null }) {
         <div className="lbl"><Icon.contact /> Kontakt</div>
         <div className="val">
           <a href={`tel:${telefon.replace(/\s/g, '')}`}>{telefon}</a>
+          <small>Fax: {fax}</small>
           <small><a href={`mailto:${email}`}>{email}</a></small>
         </div>
       </div>
