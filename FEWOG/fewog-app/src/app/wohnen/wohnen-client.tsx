@@ -16,7 +16,13 @@ const STADTTEIL_LABEL: Record<string, string> = {
   oeffingen: 'Fellbach-Oeffingen',
 };
 
-export default function WohnenClient({ liegenschaften }: { liegenschaften: Liegenschaft[] }) {
+export default function WohnenClient({
+  liegenschaften,
+  fallbackImageUrl,
+}: {
+  liegenschaften: Liegenschaft[]
+  fallbackImageUrl: string | null
+}) {
   const [page, setPage] = useState('wohnen');
   const [selected, setSelected] = useState<Liegenschaft | null>(null);
 
@@ -98,7 +104,9 @@ export default function WohnenClient({ liegenschaften }: { liegenschaften: Liege
   }, [liegenschaften]);
 
   const imageUrl = (p: Liegenschaft) =>
-    p.titelbild ? urlFor(p.titelbild).width(600).height(400).fit('crop').url() : null;
+    p.titelbild
+      ? urlFor(p.titelbild).width(600).height(400).fit('crop').url()
+      : fallbackImageUrl;
 
   const sanierungLabel = (p: Liegenschaft) => {
     const s = p.sanierungsjahr;
@@ -162,11 +170,10 @@ export default function WohnenClient({ liegenschaften }: { liegenschaften: Liege
               >
                 <div className="property-detail-panel">
                   <div className="detail-hero">
-                    {imageUrl(selected) ? (
-                      <img src={imageUrl(selected)!} alt={selected.bezeichnung} />
-                    ) : (
-                      <div className="detail-hero-placeholder" />
-                    )}
+                    {imageUrl(selected)
+                      ? <img src={imageUrl(selected)!} alt={selected.bezeichnung} />
+                      : <div className="detail-hero-placeholder" />
+                    }
                     <div className="detail-hero-overlay">
                       <div className="eyebrow">Hausdetails</div>
                       <h3>{selected.bezeichnung}</h3>

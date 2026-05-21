@@ -8,6 +8,7 @@ export const einstellungenSchema = defineType({
     { name: 'kontakt', title: 'Kontakt & Adresse', default: true },
     { name: 'oeffnungszeiten', title: 'Öffnungszeiten' },
     { name: 'social', title: 'Social Media & Links' },
+    { name: 'bilder', title: 'Bilder' },
   ],
   fields: [
     defineField({
@@ -57,6 +58,14 @@ export const einstellungenSchema = defineType({
       title: 'Bankverbindung (IBAN)',
       type: 'string',
       group: 'kontakt',
+    }),
+    defineField({
+      name: 'platzhalterbild',
+      title: 'Platzhalterbild für Liegenschaften',
+      description: 'Wird automatisch angezeigt, wenn für eine Liegenschaft kein eigenes Bild hochgeladen wurde.',
+      type: 'image',
+      group: 'bilder',
+      options: { hotspot: true },
     }),
   ],
   preview: {

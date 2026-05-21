@@ -1,3 +1,13 @@
+export const einstellungenQuery = `
+  *[_type == "einstellungen"][0] {
+    platzhalterbild
+  }
+`
+
+export type Einstellungen = {
+  platzhalterbild: { _type: 'image'; asset: { _ref: string; _type: 'reference' } } | null
+}
+
 export const liegenschaftenQuery = `
   *[_type == "liegenschaft"] | order(bezeichnung asc) {
     _id,
