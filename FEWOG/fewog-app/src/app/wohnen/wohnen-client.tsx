@@ -73,11 +73,14 @@ export default function WohnenClient({
     return () => el.removeEventListener('touchmove', onMove);
   }, [selected?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const toPromise = (ctrl: { then: (fn: VoidFunction) => unknown }) =>
+    new Promise<void>(res => ctrl.then(res));
+
   const closePanel = async () => {
     entryAnim.current?.stop();
-    const anims: PromiseLike<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
-    if (!isMobile()) anims.push(animate(wrapperW, 0, { duration: DUR, ease: EASE }));
-    await Promise.all(anims);
+    const jobs = [toPromise(animate(x, offscreen(), { duration: DUR, ease: EASE }))];
+    if (!isMobile()) jobs.push(toPromise(animate(wrapperW, 0, { duration: DUR, ease: EASE })));
+    await Promise.all(jobs);
     setSelected(null);
   };
 
@@ -92,9 +95,9 @@ export default function WohnenClient({
   const onTouchEnd = async () => {
     if (isHorizontal.current !== true) return;
     if (dragDelta.current > 80) {
-      const anims: PromiseLike<unknown>[] = [animate(x, offscreen(), { duration: DUR, ease: EASE })];
-      if (!isMobile()) anims.push(animate(wrapperW, 0, { duration: DUR, ease: EASE }));
-      await Promise.all(anims);
+      const jobs = [toPromise(animate(x, offscreen(), { duration: DUR, ease: EASE }))];
+      if (!isMobile()) jobs.push(toPromise(animate(wrapperW, 0, { duration: DUR, ease: EASE })));
+      await Promise.all(jobs);
       setSelected(null);
     } else {
       animate(x, 0, { duration: 0.2 });
